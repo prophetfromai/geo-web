@@ -32,3 +32,6 @@ Allow: /
 
 # Sitemap
 Sitemap: https://geoaudit.co.uk/sitemap-index.xml
+
+# RSS Feed
+RSS: https://geoaudit.co.uk/rss.xml

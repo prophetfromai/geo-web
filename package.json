@@ -11,6 +11,7 @@
     "deploy": "npm run build && npm run build:functions && firebase deploy"
   },
   "dependencies": {
+    "@astrojs/rss": "^4.0.15",
     "@astrojs/sitemap": "^3.7.0",
     "@astrojs/tailwind": "^5.1.0",
     "astro": "5.15.9",
