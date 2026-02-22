@@ -216,7 +216,7 @@ export function extractIdentity(jsonLd: Record<string, unknown>[]): IdentitySign
 /**
  * Detect whether a page leads with substantive content ("answer-first").
  * Checks that the first ~200 words of main content contain H1 keywords
- * and form a meaningful opening paragraph (50+ words before boilerplate).
+ * and form a meaningful opening paragraph (25+ words before boilerplate).
  */
 export function detectAnswerFirst(
   $: CheerioAPI,
@@ -247,6 +247,6 @@ export function detectAnswerFirst(
   const keywordHits = h1Words.filter((w) => chunkLower.includes(w)).length;
   const keywordRatio = h1Words.length > 0 ? keywordHits / h1Words.length : 0;
 
-  const answerFirst = firstParagraphWords >= 50 && keywordRatio >= 0.3;
+  const answerFirst = firstParagraphWords >= 25 && keywordRatio >= 0.3;
   return { answerFirst, firstParagraphWords };
 }

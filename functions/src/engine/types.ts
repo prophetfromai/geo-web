@@ -201,6 +201,7 @@ export interface Recommendation {
   steps: string[];
   triggeredBy: string;
   snippet?: string;
+  checkName?: string;
 }
 
 export interface RecommendationsResult {

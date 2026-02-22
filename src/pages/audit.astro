@@ -169,6 +169,14 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     document.getElementById("result-url")!.textContent = result.url;
     document.getElementById("pages-crawled")!.textContent = `${result.pagesCrawled} pages crawled`;
 
+    // Build set of check names that have recommendations
+    const checkNamesWithRecs = new Set<string>();
+    if (recommendations?.recommendations) {
+      for (const r of recommendations.recommendations) {
+        if (r.checkName) checkNamesWithRecs.add(r.checkName);
+      }
+    }
+
     // Categories
     const container = document.getElementById("categories-container")!;
     container.innerHTML = "";
@@ -187,15 +195,18 @@ import BaseLayout from "../layouts/BaseLayout.astro";
           </svg>
         </button>
         <div class="mt-3 hidden" data-content>
-          ${cat.checks.map((check: any) => `
-            <div class="flex items-center justify-between py-2 border-t border-[rgb(var(--color-border))]">
+          ${cat.checks.map((check: any) => {
+            const hasRec = check.score < 7 && checkNamesWithRecs.has(check.name);
+            return `
+            <div class="flex items-center justify-between py-2 border-t border-[rgb(var(--color-border))]${hasRec ? " cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 rounded transition-colors" : ""}"${hasRec ? ` data-scroll-to-check="${escapeHtml(check.name)}"` : ""}>
               <div>
                 <p class="text-sm font-medium">${check.name}</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400">${check.rationale}</p>
+                ${hasRec ? `<p class="text-xs text-brand-600 mt-0.5">View fix &darr;</p>` : ""}
               </div>
               <span class="text-sm font-semibold ml-4 whitespace-nowrap ${check.score >= 7 ? "text-green-600" : check.score >= 4 ? "text-yellow-600" : "text-red-600"}">${check.score}/10</span>
             </div>
-          `).join("")}
+          `}).join("")}
         </div>
       `;
       section.querySelector("[data-toggle]")!.addEventListener("click", () => {
@@ -214,6 +225,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       for (const rec of recommendations.recommendations) {
         const el = document.createElement("div");
         el.className = "card";
+        if (rec.checkName) el.setAttribute("data-check-name", rec.checkName);
         el.innerHTML = `
           <button class="w-full text-left" data-toggle>
             <div class="flex items-center gap-2 mb-1">
@@ -259,6 +271,26 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         recsList.appendChild(el);
       }
     }
+
+    // Wire check → recommendation scroll links
+    document.querySelectorAll("[data-scroll-to-check]").forEach((row) => {
+      row.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const checkName = (row as HTMLElement).getAttribute("data-scroll-to-check");
+        if (!checkName) return;
+        const target = document.querySelector(`[data-check-name="${CSS.escape(checkName)}"]`) as HTMLElement | null;
+        if (!target) return;
+        target.scrollIntoView({ behavior: "smooth", block: "center" });
+        // Expand the recommendation if collapsed
+        const content = target.querySelector("[data-content]") as HTMLElement | null;
+        if (content?.classList.contains("hidden")) {
+          content.classList.remove("hidden");
+        }
+        // Brief highlight ring
+        target.classList.add("ring-2", "ring-brand-500");
+        setTimeout(() => target.classList.remove("ring-2", "ring-brand-500"), 2000);
+      });
+    });
   }
 
   function generateMarkdown(data: AuditStatusResponse): string {
@@ -285,23 +317,42 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     }
 
     if (recommendations?.recommendations?.length) {
+      // Build check name → score lookup
+      const checkScores: Record<string, number> = {};
+      for (const cat of score.categories) {
+        for (const check of cat.checks) {
+          checkScores[check.name] = check.score;
+        }
+      }
+
       md += `## Recommendations\n\n`;
+      md += `Each recommendation below is self-contained — it includes the related scoring check, what was detected, fix steps, and code snippets. They can be acted on independently.\n\n`;
       for (const rec of recommendations.recommendations) {
-        md += `### ${rec.title} [${rec.disruption}] [${rec.impact.level}]\n\n`;
+        md += `### ${rec.title} [${rec.disruption}] [${rec.impact.level} impact]\n\n`;
+        if (rec.checkName) {
+          const checkScore = checkScores[rec.checkName];
+          md += `**Check:** ${rec.checkName}${checkScore != null ? ` (${checkScore}/10)` : ""}\n`;
+        }
+        md += `**Issue detected:** ${rec.triggeredBy}\n\n`;
         md += `${rec.description}\n\n`;
         if (rec.impact.citation) {
           md += `> ${rec.impact.citation}\n\n`;
         }
+        md += `**Steps:**\n`;
         for (let i = 0; i < rec.steps.length; i++) {
           md += `${i + 1}. ${rec.steps[i]}\n`;
         }
         if (rec.snippet) {
-          md += `\n\`\`\`\n${rec.snippet}\n\`\`\`\n`;
+          const lang = rec.snippet.trimStart().startsWith("{") || rec.snippet.trimStart().startsWith("<script") ? "json" : "html";
+          md += `\n**Code to add:**\n\`\`\`${lang}\n${rec.snippet}\n\`\`\`\n`;
         }
         if (rec.affectedPages.length > 0) {
-          md += `\n**Affected pages:** ${rec.affectedPages.join(", ")}\n`;
+          md += `\n**Affected pages:**\n`;
+          for (const page of rec.affectedPages) {
+            md += `- ${page}\n`;
+          }
         }
-        md += `\n`;
+        md += `\n---\n\n`;
       }
     }
 

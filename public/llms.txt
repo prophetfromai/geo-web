@@ -1,10 +1,10 @@
 # GEO Audit
 
-> Free Generative Engine Optimisation audit tool. Paste a URL and see how visible your site is to AI search engines like ChatGPT, Perplexity, and Claude.
+> Free Generative Engine Optimisation audit tool. Paste a URL and see how visible your site is to AI search engines like ChatGPT, Perplexity, Claude, and Google AI Overviews.
 
 ## What is GEO?
 
-Generative Engine Optimisation (GEO) is the practice of making websites visible to AI-powered search engines. Traditional SEO focuses on ranking in Google's blue links — GEO focuses on being cited in AI-generated answers from systems like ChatGPT, Perplexity, and Claude.
+Generative Engine Optimisation (GEO) is the practice of making websites visible to AI-powered search engines. Traditional SEO focuses on ranking in Google's blue links — GEO focuses on being cited in AI-generated answers from systems like ChatGPT, Perplexity, Claude, and Google AI Overviews.
 
 The term was formalised by researchers at Princeton and Georgia Tech (Aggarwal et al., 2023) who found that specific content optimisations — structured data, content depth, authoritative sourcing, and answer-first writing — significantly increase the likelihood of being cited in AI-generated responses.
 

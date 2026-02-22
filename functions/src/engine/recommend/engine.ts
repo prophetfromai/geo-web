@@ -79,6 +79,7 @@ function rec(
   steps: string[],
   triggeredBy: string,
   snippet?: string,
+  checkName?: string,
 ): Recommendation {
   return {
     id,
@@ -91,6 +92,7 @@ function rec(
     steps,
     triggeredBy,
     ...(snippet ? { snippet } : {}),
+    ...(checkName ? { checkName } : {}),
   };
 }
 
@@ -117,6 +119,7 @@ function robotsRules(audit: AuditResult): Recommendation[] {
         ],
         'No robots.txt detected',
         generateRobotsTxtSuggestion(audit),
+        'robots.txt AI rules',
       ),
     );
     return recs;
@@ -141,6 +144,7 @@ function robotsRules(audit: AuditResult): Recommendation[] {
         ],
         `${robots.unmentionedBots.length} AI bots have no rules`,
         generateRobotsTxtSuggestion(audit),
+        'robots.txt AI rules',
       ),
     );
   }
@@ -162,6 +166,8 @@ function robotsRules(audit: AuditResult): Recommendation[] {
           'Allow 24-48 hours for crawlers to re-index',
         ],
         `Blocked bots: ${robots.blockedBots.join(', ')}`,
+        undefined,
+        'robots.txt AI rules',
       ),
     );
   }
@@ -186,6 +192,8 @@ function robotsRules(audit: AuditResult): Recommendation[] {
           'This ensures all major AI platforms can index your content',
         ],
         `${robots.unmentionedBots.length} bots unmentioned`,
+        undefined,
+        'robots.txt AI rules',
       ),
     );
   }
@@ -217,6 +225,7 @@ function llmsTxtRules(audit: AuditResult): Recommendation[] {
         ],
         'llms.txt returned 404',
         generateLlmsTxt(audit),
+        'llms.txt',
       ),
     );
     return recs;
@@ -238,6 +247,8 @@ function llmsTxtRules(audit: AuditResult): Recommendation[] {
           'Keep it concise — your brand name or primary offering',
         ],
         'llms.txt missing title',
+        undefined,
+        'llms.txt',
       ),
     );
   }
@@ -259,6 +270,8 @@ function llmsTxtRules(audit: AuditResult): Recommendation[] {
           'Include your primary value proposition',
         ],
         'llms.txt missing description',
+        undefined,
+        'llms.txt',
       ),
     );
   }
@@ -281,6 +294,8 @@ function llmsTxtRules(audit: AuditResult): Recommendation[] {
           'Include 5-20 of your highest-value pages',
         ],
         'llms.txt has 0 linked pages',
+        undefined,
+        'llms.txt',
       ),
     );
   }
@@ -321,6 +336,7 @@ function schemaRules(audit: AuditResult): Recommendation[] {
         ],
         '0 pages have schema',
         generateOrganizationJsonLd(audit),
+        'Schema coverage',
       ),
     );
     return recs;
@@ -347,6 +363,8 @@ function schemaRules(audit: AuditResult): Recommendation[] {
           'Validate each page with Google Rich Results Test',
         ],
         `${withoutSchema.length} pages missing schema`,
+        undefined,
+        'Schema coverage',
       ),
     );
   }
@@ -369,6 +387,7 @@ function schemaRules(audit: AuditResult): Recommendation[] {
         ],
         'Organization schema not detected',
         generateOrganizationJsonLd(audit),
+        'Schema coverage',
       ),
     );
   }
@@ -390,6 +409,7 @@ function schemaRules(audit: AuditResult): Recommendation[] {
         ],
         'WebSite schema not detected',
         generateWebSiteJsonLd(audit),
+        'Schema coverage',
       ),
     );
   }
@@ -418,6 +438,7 @@ function schemaRules(audit: AuditResult): Recommendation[] {
         ],
         'No FAQPage schema on site with 5+ pages',
         generateFAQPageJsonLd(faqCandidate),
+        'Schema coverage',
       ),
     );
   }
@@ -439,6 +460,8 @@ function schemaRules(audit: AuditResult): Recommendation[] {
           'Format: Home > Category > Page',
         ],
         'BreadcrumbList schema not detected',
+        undefined,
+        'Schema coverage',
       ),
     );
   }
@@ -465,6 +488,7 @@ function schemaRules(audit: AuditResult): Recommendation[] {
         ],
         `${contentPagesWithoutArticle.length} content pages missing Article schema`,
         generateArticleJsonLd(contentPagesWithoutArticle[0]),
+        'Schema coverage',
       ),
     );
   }
@@ -489,6 +513,7 @@ function schemaRules(audit: AuditResult): Recommendation[] {
         ],
         `${productPages.length} product pages missing schema`,
         generateProductJsonLd(productPages[0]),
+        'Schema coverage',
       ),
     );
   }
@@ -521,6 +546,8 @@ function metaRules(audit: AuditResult): Recommendation[] {
           'AI systems use these as content summaries for relevance assessment',
         ],
         `${missingDesc.length} pages with missing/short descriptions`,
+        undefined,
+        'Meta descriptions',
       ),
     );
   }
@@ -545,6 +572,8 @@ function metaRules(audit: AuditResult): Recommendation[] {
           'Make each title unique across the site',
         ],
         `${shortTitles.length} pages with short titles`,
+        undefined,
+        'Meta descriptions',
       ),
     );
   }
@@ -571,6 +600,8 @@ function metaRules(audit: AuditResult): Recommendation[] {
           'Most CMS platforms have plugins to auto-generate OG tags',
         ],
         `${incompleteOg.length} pages with incomplete OG tags`,
+        undefined,
+        'OG & Twitter completeness',
       ),
     );
   }
@@ -594,6 +625,8 @@ function metaRules(audit: AuditResult): Recommendation[] {
           'These complement OG tags for broader platform coverage',
         ],
         `${missingTwitter.length} pages missing Twitter Card tags`,
+        undefined,
+        'OG & Twitter completeness',
       ),
     );
   }
@@ -616,6 +649,8 @@ function metaRules(audit: AuditResult): Recommendation[] {
           'This prevents duplicate content confusion in AI pipelines',
         ],
         `${missingCanonical.length} pages missing canonical`,
+        undefined,
+        'Meta descriptions',
       ),
     );
   }
@@ -647,6 +682,8 @@ function contentRules(audit: AuditResult): Recommendation[] {
           'Similar thin pages: consolidate into a single comprehensive page',
         ],
         `${thinPages.length} pages under 100 words`,
+        undefined,
+        'Content depth',
       ),
     );
   }
@@ -675,6 +712,8 @@ function contentRules(audit: AuditResult): Recommendation[] {
           'Alt text should be concise (125 characters max) but descriptive',
         ],
         `${totalMissing + totalWeak} images with missing/weak alt text`,
+        undefined,
+        'Image accessibility',
       ),
     );
   }
@@ -700,6 +739,8 @@ function contentRules(audit: AuditResult): Recommendation[] {
           'Use the "inverted pyramid" style — conclusion first, details after',
         ],
         `${noAnswerFirst.length} pages don't lead with direct answers`,
+        undefined,
+        'Answer-first content',
       ),
     );
   }
@@ -730,6 +771,8 @@ function contentRules(audit: AuditResult): Recommendation[] {
           'AI systems use heading hierarchy to understand topic relationships',
         ],
         `${hierarchyIssues.length} pages with heading hierarchy gaps`,
+        undefined,
+        'Heading quality',
       ),
     );
   }
@@ -757,6 +800,8 @@ function contentRules(audit: AuditResult): Recommendation[] {
           'AI systems use heading structure to parse content topics',
         ],
         `${headingIssues.length} pages with H1 issues`,
+        undefined,
+        'Heading quality',
       ),
     );
   }
@@ -779,6 +824,8 @@ function contentRules(audit: AuditResult): Recommendation[] {
           'Update sitemap and canonical URLs to HTTPS',
         ],
         'Site not served over HTTPS',
+        undefined,
+        'HTTPS & performance',
       ),
     );
   }
@@ -815,6 +862,7 @@ function authorityRules(audit: AuditResult): Recommendation[] {
         ],
         'No entity identity signals detected',
         generateOrganizationJsonLd(audit),
+        'Entity clarity',
       ),
     );
   }
@@ -838,6 +886,8 @@ function authorityRules(audit: AuditResult): Recommendation[] {
           'Most static site generators and CMS platforms can auto-generate RSS feeds',
         ],
         'No RSS feed detected',
+        undefined,
+        'Agent discoverability',
       ),
     );
   }
@@ -862,6 +912,8 @@ function authorityRules(audit: AuditResult): Recommendation[] {
           'Consider adding an about page with detailed author/team bios',
         ],
         'No author info in structured data',
+        undefined,
+        'Entity clarity',
       ),
     );
   }
@@ -890,6 +942,7 @@ function authorityRules(audit: AuditResult): Recommendation[] {
           ],
           'About page missing schema',
           generateAboutPageJsonLd(withoutAboutSchema[0], audit),
+          'Entity clarity',
         ),
       );
     }
@@ -919,6 +972,8 @@ function infrastructureRules(audit: AuditResult): Recommendation[] {
           'Submit to Google Search Console',
         ],
         'No sitemap detected',
+        undefined,
+        'Sitemap',
       ),
     );
   }
@@ -943,6 +998,8 @@ function infrastructureRules(audit: AuditResult): Recommendation[] {
           'Remove any URLs that return 404 or redirect',
         ],
         `Sitemap has fewer URLs (${audit.technical.sitemapUrls.length}) than crawled pages (${audit.pagesCrawled})`,
+        undefined,
+        'Sitemap',
       ),
     );
   }
