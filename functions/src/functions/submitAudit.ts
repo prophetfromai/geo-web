@@ -1,7 +1,6 @@
 import { onRequest } from 'firebase-functions/v2/https';
 import { Timestamp } from 'firebase-admin/firestore';
 import { db, FUNCTIONS_REGION, ANON_MAX_PAGES, ANON_EXPIRY_MS } from '../config.js';
-import { checkRateLimit } from '../middleware/rateLimit.js';
 
 export const submitAudit = onRequest(
   {
@@ -31,16 +30,6 @@ export const submitAudit = onRequest(
       }
     } catch {
       res.status(400).json({ error: { message: 'Invalid URL' } });
-      return;
-    }
-
-    // Rate limit by IP
-    const ip = req.ip || req.headers['x-forwarded-for'] as string || 'unknown';
-    const allowed = await checkRateLimit(ip);
-    if (!allowed) {
-      res.status(429).json({
-        error: { message: 'Rate limit exceeded. Anonymous users can run 3 audits per day.' },
-      });
       return;
     }
 

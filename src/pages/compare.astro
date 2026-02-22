@@ -1,0 +1,491 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Compare Audits — GEO Audit" noindex={true}>
+  <div class="mx-auto max-w-5xl px-4 sm:px-6 py-8">
+
+    <!-- Input form — two drop zones -->
+    <div id="form-state">
+      <h1 class="text-2xl font-bold mb-2 text-center">Compare Two Audits</h1>
+      <p class="text-sm text-gray-500 dark:text-gray-400 text-center mb-6">Drop your downloaded audit report files to compare them side by side.</p>
+      <div class="grid sm:grid-cols-2 gap-4 mb-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Audit A</label>
+          <div id="drop-a" class="drop-zone rounded-xl border-2 border-dashed border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] p-8 text-center cursor-pointer transition hover:border-brand-500">
+            <svg class="w-8 h-8 mx-auto mb-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m6.75 12l-3-3m0 0l-3 3m3-3v6m-1.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
+            </svg>
+            <p class="text-sm text-gray-500 dark:text-gray-400" id="drop-a-label">Drop .md file or click to browse</p>
+            <input type="file" accept=".md" class="hidden" id="file-a" />
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Audit B</label>
+          <div id="drop-b" class="drop-zone rounded-xl border-2 border-dashed border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] p-8 text-center cursor-pointer transition hover:border-brand-500">
+            <svg class="w-8 h-8 mx-auto mb-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m6.75 12l-3-3m0 0l-3 3m3-3v6m-1.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
+            </svg>
+            <p class="text-sm text-gray-500 dark:text-gray-400" id="drop-b-label">Drop .md file or click to browse</p>
+            <input type="file" accept=".md" class="hidden" id="file-b" />
+          </div>
+        </div>
+      </div>
+      <div class="text-center">
+        <button id="compare-btn" class="btn-primary" disabled>Compare</button>
+      </div>
+    </div>
+
+    <!-- Error state -->
+    <div id="error-state" class="hidden">
+      <div class="text-center py-16">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-50 dark:bg-red-950 mb-4">
+          <svg class="w-8 h-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/>
+          </svg>
+        </div>
+        <h2 class="text-2xl font-bold mb-2">Comparison failed</h2>
+        <p class="text-gray-500 dark:text-gray-400" id="error-message"></p>
+        <button id="try-again-btn" class="btn-primary mt-6">Try again</button>
+      </div>
+    </div>
+
+    <!-- Results state -->
+    <div id="results-state" class="hidden">
+
+      <!-- Score header -->
+      <div id="score-header" class="grid grid-cols-[1fr_auto_1fr] gap-4 items-center mb-8"></div>
+
+      <!-- AI Summary placeholder -->
+      <div class="border-2 border-dashed border-[rgb(var(--color-border))] rounded-xl p-6 mb-8 text-center">
+        <svg class="w-6 h-6 mx-auto mb-2 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z"/>
+        </svg>
+        <p class="text-sm text-gray-500 dark:text-gray-400">Coming soon — AI-generated analysis of the key differences.</p>
+      </div>
+
+      <!-- Category breakdown -->
+      <div id="categories-container" class="space-y-4 mb-8"></div>
+
+      <!-- Check-by-check table -->
+      <div class="card mb-8 overflow-x-auto">
+        <h2 class="text-lg font-semibold mb-4">Check-by-Check Comparison</h2>
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-[rgb(var(--color-border))]">
+              <th class="text-left py-2 pr-4 font-medium">Check</th>
+              <th class="text-left py-2 pr-4 font-medium">Category</th>
+              <th class="text-right py-2 pr-4 font-medium">Site A</th>
+              <th class="text-right py-2 pr-4 font-medium">Site B</th>
+              <th class="text-right py-2 font-medium">Delta</th>
+            </tr>
+          </thead>
+          <tbody id="checks-tbody"></tbody>
+        </table>
+      </div>
+
+      <!-- Recommendations diff -->
+      <div id="recs-container" class="mb-8">
+        <h2 class="text-xl font-semibold mb-4">Recommendations</h2>
+        <div id="recs-shared" class="hidden mb-6">
+          <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-3">Shared</h3>
+          <div id="recs-shared-list" class="space-y-3"></div>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-6">
+          <div>
+            <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-3" id="recs-only-a-title"></h3>
+            <div id="recs-only-a-list" class="space-y-3"></div>
+          </div>
+          <div>
+            <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-3" id="recs-only-b-title"></h3>
+            <div id="recs-only-b-list" class="space-y-3"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  // --- Types ---
+  interface AuditData {
+    _geo_audit: true;
+    auditId: string;
+    url: string;
+    score: {
+      score: number;
+      grade: string;
+      categories: {
+        category: string;
+        score: number;
+        maxScore: number;
+        checks: { name: string; score: number; rationale: string }[];
+      }[];
+    };
+    pagesCrawled: number;
+    recommendations: {
+      id: string;
+      title: string;
+      description: string;
+      disruption: string;
+      impact: { level: string; citation: string };
+      steps: string[];
+      affectedPages: string[];
+    }[];
+  }
+
+  // --- DOM refs ---
+  const formState = document.getElementById("form-state")!;
+  const errorState = document.getElementById("error-state")!;
+  const resultsState = document.getElementById("results-state")!;
+  const errorMessage = document.getElementById("error-message")!;
+  const compareBtn = document.getElementById("compare-btn") as HTMLButtonElement;
+  const tryAgainBtn = document.getElementById("try-again-btn")!;
+
+  const dropA = document.getElementById("drop-a")!;
+  const dropB = document.getElementById("drop-b")!;
+  const fileInputA = document.getElementById("file-a") as HTMLInputElement;
+  const fileInputB = document.getElementById("file-b") as HTMLInputElement;
+  const labelA = document.getElementById("drop-a-label")!;
+  const labelB = document.getElementById("drop-b-label")!;
+
+  let auditA: AuditData | null = null;
+  let auditB: AuditData | null = null;
+
+  // --- Drop zone wiring ---
+  setupDropZone(dropA, fileInputA, labelA, (data) => { auditA = data; updateCompareBtn(); });
+  setupDropZone(dropB, fileInputB, labelB, (data) => { auditB = data; updateCompareBtn(); });
+
+  function setupDropZone(
+    zone: HTMLElement,
+    input: HTMLInputElement,
+    label: HTMLElement,
+    onParsed: (data: AuditData) => void,
+  ) {
+    zone.addEventListener("click", () => input.click());
+
+    zone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      zone.classList.add("border-brand-500", "bg-brand-50", "dark:bg-brand-950");
+    });
+
+    zone.addEventListener("dragleave", () => {
+      zone.classList.remove("border-brand-500", "bg-brand-50", "dark:bg-brand-950");
+    });
+
+    zone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      zone.classList.remove("border-brand-500", "bg-brand-50", "dark:bg-brand-950");
+      const file = e.dataTransfer?.files[0];
+      if (file) handleFile(file, zone, label, onParsed);
+    });
+
+    input.addEventListener("change", () => {
+      const file = input.files?.[0];
+      if (file) handleFile(file, zone, label, onParsed);
+    });
+  }
+
+  function handleFile(
+    file: File,
+    zone: HTMLElement,
+    label: HTMLElement,
+    onParsed: (data: AuditData) => void,
+  ) {
+    if (!file.name.endsWith(".md")) {
+      label.textContent = "Not a .md file — try again";
+      label.classList.add("text-red-500");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const text = reader.result as string;
+      const data = parseAuditMarkdown(text);
+      if (!data) {
+        label.textContent = "Not a valid GEO audit report";
+        label.classList.add("text-red-500");
+        return;
+      }
+      onParsed(data);
+      const domain = getDomain(data.url);
+      label.textContent = `${domain} — ${data.score.score}/100`;
+      label.classList.remove("text-red-500");
+      zone.classList.remove("border-dashed");
+      zone.classList.add("border-brand-500");
+    };
+    reader.readAsText(file);
+  }
+
+  function parseAuditMarkdown(text: string): AuditData | null {
+    const match = text.match(/<!-- GEO_AUDIT_DATA\n([\s\S]*?)\n-->/);
+    if (!match) return null;
+    try {
+      const data = JSON.parse(match[1]);
+      if (!data._geo_audit || !data.score || !data.url) return null;
+      return data as AuditData;
+    } catch {
+      return null;
+    }
+  }
+
+  function updateCompareBtn() {
+    compareBtn.disabled = !(auditA && auditB);
+  }
+
+  // --- Compare ---
+  compareBtn.addEventListener("click", () => {
+    if (!auditA || !auditB) return;
+    if (auditA.auditId === auditB.auditId) {
+      showError("Both files are from the same audit. Drop two different audit reports.");
+      return;
+    }
+    formState.classList.add("hidden");
+    resultsState.classList.remove("hidden");
+    renderComparison(auditA, auditB);
+  });
+
+  tryAgainBtn.addEventListener("click", () => {
+    errorState.classList.add("hidden");
+    resultsState.classList.add("hidden");
+    formState.classList.remove("hidden");
+  });
+
+  function showError(msg: string) {
+    formState.classList.add("hidden");
+    resultsState.classList.add("hidden");
+    errorState.classList.remove("hidden");
+    errorMessage.textContent = msg;
+  }
+
+  // --- Render ---
+  function renderComparison(a: AuditData, b: AuditData) {
+    const domainA = getDomain(a.url);
+    const domainB = getDomain(b.url);
+    const scoreA = a.score.score;
+    const scoreB = b.score.score;
+
+    // Score header
+    const delta = scoreB - scoreA;
+    document.getElementById("score-header")!.innerHTML = `
+      <div class="card text-center">
+        <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Audit A</p>
+        <p class="text-sm font-semibold truncate mb-2" title="${a.url}">${domainA}</p>
+        ${miniGauge(scoreA, "gauge-a")}
+        <span class="inline-block mt-2 px-2 py-0.5 rounded-full text-xs font-semibold ${gradeClass(a.score.grade)}">${a.score.grade}</span>
+      </div>
+      <div class="flex items-center justify-center">
+        <span class="inline-block px-3 py-1.5 rounded-full text-sm font-bold ${deltaColorClass(delta)}">${formatDelta(delta)}</span>
+      </div>
+      <div class="card text-center">
+        <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Audit B</p>
+        <p class="text-sm font-semibold truncate mb-2" title="${b.url}">${domainB}</p>
+        ${miniGauge(scoreB, "gauge-b")}
+        <span class="inline-block mt-2 px-2 py-0.5 rounded-full text-xs font-semibold ${gradeClass(b.score.grade)}">${b.score.grade}</span>
+      </div>
+    `;
+    requestAnimationFrame(() => {
+      animateGauge("gauge-a", scoreA);
+      animateGauge("gauge-b", scoreB);
+    });
+
+    // Category breakdown
+    const catsContainer = document.getElementById("categories-container")!;
+    catsContainer.innerHTML = "";
+    for (const catA of a.score.categories) {
+      const catB = b.score.categories.find((c) => c.category === catA.category);
+      if (!catB) continue;
+      const pctA = catA.maxScore > 0 ? Math.round((catA.score / catA.maxScore) * 100) : 0;
+      const pctB = catB.maxScore > 0 ? Math.round((catB.score / catB.maxScore) * 100) : 0;
+      const catDelta = pctB - pctA;
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-sm font-semibold capitalize">${catA.category}</span>
+          <span class="text-xs font-semibold ${deltaColorClass(catDelta)}">${formatDelta(catDelta)}%</span>
+        </div>
+        <div class="space-y-2">
+          <div>
+            <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
+              <span>${domainA}</span><span>${pctA}%</span>
+            </div>
+            <div class="bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+              <div class="h-2 rounded-full transition-all duration-500" style="width: ${pctA}%; background: ${scoreColor(pctA)}"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
+              <span>${domainB}</span><span>${pctB}%</span>
+            </div>
+            <div class="bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+              <div class="h-2 rounded-full transition-all duration-500" style="width: ${pctB}%; background: ${scoreColor(pctB)}"></div>
+            </div>
+          </div>
+        </div>
+      `;
+      catsContainer.appendChild(card);
+    }
+
+    // Check-by-check table
+    const tbody = document.getElementById("checks-tbody")!;
+    tbody.innerHTML = "";
+    const checksA = flattenChecks(a.score.categories);
+    const checksB = flattenChecks(b.score.categories);
+    const allCheckNames = [...new Set([...checksA.map((c) => c.name), ...checksB.map((c) => c.name)])];
+    for (const name of allCheckNames) {
+      const cA = checksA.find((c) => c.name === name);
+      const cB = checksB.find((c) => c.name === name);
+      const sA = cA?.score ?? null;
+      const sB = cB?.score ?? null;
+      const d = sA !== null && sB !== null ? sB - sA : null;
+      const category = cA?.category || cB?.category || "";
+      const tr = document.createElement("tr");
+      tr.className = "border-t border-[rgb(var(--color-border))]";
+      tr.innerHTML = `
+        <td class="py-2 pr-4">${name}</td>
+        <td class="py-2 pr-4 capitalize text-gray-500 dark:text-gray-400">${category}</td>
+        <td class="py-2 pr-4 text-right font-semibold ${sA !== null ? scoreTextColor(sA) : ""}">${sA !== null ? sA + "/10" : "-"}</td>
+        <td class="py-2 pr-4 text-right font-semibold ${sB !== null ? scoreTextColor(sB) : ""}">${sB !== null ? sB + "/10" : "-"}</td>
+        <td class="py-2 text-right font-semibold ${d !== null ? deltaColorClass(d) : ""}">${d !== null ? formatDelta(d) : "-"}</td>
+      `;
+      tbody.appendChild(tr);
+    }
+
+    // Recommendations diff
+    const recsA = a.recommendations || [];
+    const recsB = b.recommendations || [];
+    const sharedRecs: typeof recsA = [];
+    const onlyA: typeof recsA = [];
+    const onlyB: typeof recsB = [];
+    const recBIds = new Set(recsB.map((r) => r.id));
+    const recAIds = new Set(recsA.map((r) => r.id));
+    for (const rec of recsA) {
+      if (recBIds.has(rec.id)) sharedRecs.push(rec);
+      else onlyA.push(rec);
+    }
+    for (const rec of recsB) {
+      if (!recAIds.has(rec.id)) onlyB.push(rec);
+    }
+
+    const sharedSection = document.getElementById("recs-shared")!;
+    const sharedList = document.getElementById("recs-shared-list")!;
+    if (sharedRecs.length > 0) {
+      sharedSection.classList.remove("hidden");
+      sharedList.innerHTML = sharedRecs.map(renderRecCard).join("");
+    }
+
+    document.getElementById("recs-only-a-title")!.textContent = `Only ${domainA}`;
+    document.getElementById("recs-only-a-list")!.innerHTML = onlyA.length > 0
+      ? onlyA.map(renderRecCard).join("")
+      : `<p class="text-sm text-gray-400">None</p>`;
+
+    document.getElementById("recs-only-b-title")!.textContent = `Only ${domainB}`;
+    document.getElementById("recs-only-b-list")!.innerHTML = onlyB.length > 0
+      ? onlyB.map(renderRecCard).join("")
+      : `<p class="text-sm text-gray-400">None</p>`;
+  }
+
+  // --- Helpers ---
+
+  function getDomain(url: string): string {
+    try { return new URL(url).hostname; } catch { return url; }
+  }
+
+  function flattenChecks(categories: AuditData["score"]["categories"]) {
+    const checks: { name: string; score: number; category: string }[] = [];
+    for (const cat of categories) {
+      for (const check of cat.checks) {
+        checks.push({ name: check.name, score: check.score, category: cat.category });
+      }
+    }
+    return checks;
+  }
+
+  function miniGauge(score: number, id: string): string {
+    const c = 2 * Math.PI * 32;
+    return `
+      <svg width="80" height="80" viewBox="0 0 80 80" class="mx-auto transform -rotate-90">
+        <circle cx="40" cy="40" r="32" fill="none" stroke="rgb(var(--color-border))" stroke-width="6"/>
+        <circle id="${id}" cx="40" cy="40" r="32" fill="none" stroke-width="6" stroke-linecap="round"
+          stroke-dasharray="${c}" stroke-dashoffset="${c}" style="stroke: ${scoreColor(score)}; transition: stroke-dashoffset 1s ease"/>
+      </svg>
+      <div style="margin-top: -56px; margin-bottom: 16px;" class="text-center">
+        <span class="text-lg font-bold">${score}</span>
+        <span class="text-[10px] text-gray-500 dark:text-gray-400">/100</span>
+      </div>
+    `;
+  }
+
+  function animateGauge(id: string, score: number) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const c = 2 * Math.PI * 32;
+    el.style.strokeDashoffset = String(c - (score / 100) * c);
+  }
+
+  function renderRecCard(rec: AuditData["recommendations"][number]): string {
+    return `
+      <div class="card !p-3">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="inline-block w-2 h-2 rounded-full ${impactDot(rec.impact.level)}"></span>
+          <span class="text-sm font-semibold">${rec.title}</span>
+          <span class="ml-auto text-xs px-2 py-0.5 rounded-full ${disruptionBadge(rec.disruption)}">${rec.disruption}</span>
+        </div>
+        <p class="text-xs text-gray-500 dark:text-gray-400">${rec.description}</p>
+      </div>
+    `;
+  }
+
+  function scoreColor(score: number): string {
+    if (score >= 80) return "#16b362";
+    if (score >= 60) return "#eab308";
+    if (score >= 40) return "#f97316";
+    return "#ef4444";
+  }
+
+  function scoreTextColor(score: number): string {
+    if (score >= 7) return "text-green-600";
+    if (score >= 4) return "text-yellow-600";
+    return "text-red-600";
+  }
+
+  function gradeClass(grade: string): string {
+    switch (grade) {
+      case "Excellent": return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+      case "Good": return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
+      case "Needs Work": return "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200";
+      default: return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
+    }
+  }
+
+  function impactDot(level: string): string {
+    switch (level) {
+      case "high": return "bg-red-500";
+      case "medium": return "bg-yellow-500";
+      default: return "bg-gray-400";
+    }
+  }
+
+  function disruptionBadge(level: string): string {
+    switch (level) {
+      case "non-invasive": return "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300";
+      case "low": return "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300";
+      case "moderate": return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300";
+      default: return "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300";
+    }
+  }
+
+  function deltaColorClass(delta: number): string {
+    if (delta > 0) return "text-green-600 dark:text-green-400";
+    if (delta < 0) return "text-red-600 dark:text-red-400";
+    return "text-gray-500 dark:text-gray-400";
+  }
+
+  function formatDelta(delta: number): string {
+    if (delta > 0) return `+${delta}`;
+    if (delta < 0) return String(delta);
+    return "0";
+  }
+</script>

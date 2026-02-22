@@ -7,7 +7,7 @@ export default defineConfig({
   integrations: [
     tailwind(),
     sitemap({
-      filter: (page) => !page.includes("/audit"),
+      filter: (page) => !page.includes("/audit") && !page.includes("/compare"),
     }),
   ],
   output: "static",
