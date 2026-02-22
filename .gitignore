@@ -6,3 +6,5 @@ dist/
 .firebase/
 .output/
 functions/lib/
+.astro/
+firestore-debug.log
