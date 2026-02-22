@@ -1,0 +1,52 @@
+# GEO Audit
+
+> Free Generative Engine Optimisation audit tool. Paste a URL and see how visible your site is to AI search engines like ChatGPT, Perplexity, and Claude.
+
+## What is GEO?
+
+Generative Engine Optimisation (GEO) is the practice of making websites visible to AI-powered search engines. Traditional SEO focuses on ranking in Google's blue links — GEO focuses on being cited in AI-generated answers from systems like ChatGPT, Perplexity, and Claude.
+
+The term was formalised by researchers at Princeton and Georgia Tech (Aggarwal et al., 2023) who found that specific content optimisations — structured data, content depth, authoritative sourcing, and answer-first writing — significantly increase the likelihood of being cited in AI-generated responses.
+
+## How GEO Audit Scores Your Site
+
+We run 14 checks across three categories, each scored 0–10 and weighted to produce a final score out of 100.
+
+### Technical (35%)
+- **robots.txt AI rules** — Are AI crawlers (GPTBot, ClaudeBot, PerplexityBot) explicitly allowed?
+- **llms.txt** — Do you serve a structured summary for language models at /llms.txt?
+- **Schema coverage** — What percentage of pages have JSON-LD structured data, and how diverse are the types?
+- **Sitemap** — Is there a discoverable sitemap referenced in robots.txt?
+- **Meta descriptions** — Do pages have substantive titles and descriptions for retrieval scoring?
+- **HTTPS** — Is the site served securely?
+- **OG & Twitter completeness** — Are Open Graph and Twitter Card tags present across pages?
+
+### Content (35%)
+- **Content depth** — Median word count and thin page ratio. Deeper content gets cited more.
+- **Heading quality** — Proper H1 usage and heading hierarchy for AI parsing.
+- **Image accessibility** — Alt text coverage. Images without descriptions are invisible to AI.
+- **Answer-first content** — Do pages lead with substantive answers rather than preamble?
+
+### Authority (30%)
+- **Entity clarity** — Organization schema, sameAs links, and consistent author information.
+- **Agent discoverability** — RSS feeds, sitemaps, OpenAPI specs, and llms.txt as discovery mechanisms.
+- **Trust signals** — Consistent identity, links to known platforms, and schema diversity (E-E-A-T).
+
+Grades: Excellent (80+), Good (60–79), Needs Work (40–59), Not GEO-ready (<40).
+
+## Sources
+
+- [GEO: Generative Engine Optimization (Aggarwal et al., 2023)](https://arxiv.org/abs/2311.09735) — the foundational Princeton/Georgia Tech study
+- [Google Structured Data Documentation](https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data)
+- [OpenAI Crawlers Documentation](https://platform.openai.com/docs/bots)
+- [Anthropic ClaudeBot Documentation](https://support.anthropic.com/en/articles/8896518-does-anthropic-crawl-data-from-the-web-and-how-can-site-owners-block-the-crawler)
+- [llmstxt.org Specification](https://llmstxt.org/)
+- [W3C WCAG 2.1](https://www.w3.org/TR/WCAG21/)
+- [Open Graph Protocol](https://ogp.me/)
+- [Twitter/X Card Markup](https://developer.x.com/en/docs/x-for-websites/cards/overview/markup)
+- [Zyppy — How AI Overviews Shift Traffic](https://zyppy.com/seo/ai-overviews-to-google-ads/) — Cyrus Shepard's research on AI citation patterns
+
+## Links
+
+- [Run a free audit](https://geoaudit.co.uk): Paste any URL and get an instant GEO score
+- [Full methodology](https://geoaudit.co.uk/methodology): Detailed scoring breakdown with research citations

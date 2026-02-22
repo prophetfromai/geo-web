@@ -1,0 +1,301 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="Methodology — GEO Audit"
+  description="How GEO Audit scores your site across 14 checks in technical, content, and authority categories. Full methodology with research citations."
+>
+  <div class="mx-auto max-w-3xl px-4 sm:px-6 py-12">
+
+    <!-- Hero -->
+    <section class="mb-12">
+      <h1 class="text-3xl sm:text-4xl font-bold tracking-tight mb-4">How We Score Your Site</h1>
+      <p class="text-lg text-gray-600 dark:text-gray-300">
+        GEO Audit runs <strong>14 checks</strong> across three categories — technical, content, and authority — to measure how visible your site is to AI search engines. Every check is grounded in published research and real platform documentation.
+      </p>
+    </section>
+
+    <!-- Scoring overview -->
+    <section class="mb-12">
+      <h2 class="text-xl font-semibold mb-4">Scoring Breakdown</h2>
+      <div class="grid sm:grid-cols-3 gap-4">
+        <div class="card text-center">
+          <div class="text-3xl font-bold text-brand-600 mb-1">35%</div>
+          <div class="text-sm font-semibold mb-1">Technical</div>
+          <p class="text-xs text-gray-500 dark:text-gray-400">7 checks — crawlability, structured data, and infrastructure signals</p>
+        </div>
+        <div class="card text-center">
+          <div class="text-3xl font-bold text-brand-600 mb-1">35%</div>
+          <div class="text-sm font-semibold mb-1">Content</div>
+          <p class="text-xs text-gray-500 dark:text-gray-400">4 checks — depth, structure, accessibility, and answer quality</p>
+        </div>
+        <div class="card text-center">
+          <div class="text-3xl font-bold text-brand-600 mb-1">30%</div>
+          <div class="text-sm font-semibold mb-1">Authority</div>
+          <p class="text-xs text-gray-500 dark:text-gray-400">3 checks — entity identity, discoverability, and trust</p>
+        </div>
+      </div>
+      <p class="text-sm text-gray-500 dark:text-gray-400 mt-4">
+        Each check scores 0–10. Scores are weighted within their category, then categories combine to produce a final score out of 100. Grades: <strong>Excellent</strong> (80+), <strong>Good</strong> (60–79), <strong>Needs Work</strong> (40–59), <strong>Not GEO-ready</strong> (&lt;40).
+      </p>
+    </section>
+
+    <!-- Technical category -->
+    <section class="mb-12">
+      <h2 class="text-xl font-semibold mb-1">Technical</h2>
+      <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">7 checks — 35% of your total score</p>
+      <div class="space-y-4">
+
+        <div class="card">
+          <h3 class="font-semibold mb-2">robots.txt AI Rules</h3>
+          <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
+            <strong>What we check:</strong> Whether your robots.txt explicitly addresses AI crawlers like GPTBot, ClaudeBot, and PerplexityBot.
+          </p>
+          <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
+            <strong>Why it matters:</strong> AI search engines respect robots.txt directives. If you don't mention AI crawlers, you're leaving access to default behaviour — which may change. Explicitly allowing crawlers signals intent and ensures your content is indexed for AI-generated answers. OpenAI's GPTBot and Anthropic's ClaudeBot both document robots.txt compliance.
+          </p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            <strong>How we score:</strong> 0 if no robots.txt exists. 3 if it exists but doesn't mention AI bots. 4 if it blocks AI crawlers. 5–10 based on the ratio of AI crawlers explicitly allowed.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3 class="font-semibold mb-2">llms.txt</h3>
+          <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
+            <strong>What we check:</strong> Whether your site serves an llms.txt file at the root domain.
+          </p>
+          <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
+            <strong>Why it matters:</strong> llms.txt is an emerging standard that gives AI systems a structured summary of your site — what it does, what content matters, and where to find it. It's the equivalent of a README for language models, helping them understand your site without crawling every page. The specification is defined at llmstxt.org.
+          </p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            <strong>How we score:</strong> 0 if not found. Base score of 5 for existence, +1 for title, +1 for description, up to +3 for linked pages. Maximum 10.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3 class="font-semibold mb-2">Schema Coverage</h3>
+          <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
+            <strong>What we check:</strong> The percentage of pages with structured data (JSON-LD) and the diversity of schema types used.
+          </p>
+          <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
+            <strong>Why it matters:</strong> Structured data is how machines understand your content. The Princeton/Georgia Tech GEO study found that adding structured markup significantly increases citation likelihood in AI-generated responses. Google's Structured Data documentation confirms that rich results depend on proper schema implementation.
+          </p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            <strong>How we score:</strong> Coverage ratio drives 0–7 of the score. Schema type diversity adds up to 3 bonus points. Maximum 10.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3 class="font-semibold mb-2">Sitemap</h3>
+          <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
+            <strong>What we check:</strong> Whether your site has a discoverable sitemap referenced in robots.txt.
+          </p>
+          <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
+            <strong>Why it matters:</strong> Sitemaps help AI crawlers discover your full content inventory efficiently. OpenAI's GPTBot documentation references sitemap discovery as a primary mechanism for finding pages to index. Without a sitemap, crawlers may miss important content.
+          </p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            <strong>How we score:</strong> 0 if no sitemap found. 5 if sitemap exists but has no URLs. 8 if sitemap exists with URLs referenced in robots.txt.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3 class="font-semibold mb-2">Meta Descriptions</h3>
+          <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
+            <strong>What we check:</strong> The proportion of pages with substantive meta descriptions (50+ characters) and titles (10+ characters).
+          </p>
+          <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
+            <strong>Why it matters:</strong> Meta descriptions are one of the first signals AI retrieval systems use when deciding which content to cite. In RAG (Retrieval-Augmented Generation) pipelines, the description often serves as the snippet that determines relevance scoring before the full page is ever read.
+          </p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            <strong>How we score:</strong> Description coverage contributes 60% of the score, title coverage 40%. Pages with missing or very short descriptions/titles reduce the score proportionally.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3 class="font-semibold mb-2">HTTPS</h3>
+          <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
+            <strong>What we check:</strong> Whether your site enforces HTTPS.
+          </p>
+          <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
+            <strong>Why it matters:</strong> HTTPS has been a confirmed Google ranking factor since 2014, and AI search engines inherit these trust signals. A site without HTTPS is penalised in both traditional and AI search. It's a baseline infrastructure requirement.
+          </p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            <strong>How we score:</strong> 3 if not HTTPS. 7 if HTTPS is enforced.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3 class="font-semibold mb-2">OG & Twitter Completeness</h3>
+          <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
+            <strong>What we check:</strong> The completeness of Open Graph (og:title, og:description, og:image, og:url) and Twitter Card tags across all pages.
+          </p>
+          <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
+            <strong>Why it matters:</strong> Open Graph and Twitter Card metadata are used by AI systems as structured signals about page content. They provide clean, pre-formatted summaries that retrieval systems can use without parsing the full page. The Open Graph protocol (ogp.me) and Twitter Card documentation define these standards.
+          </p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            <strong>How we score:</strong> Average completeness across all pages (5 fields checked per page). 10 means every page has all OG + Twitter tags.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Content category -->
+    <section class="mb-12">
+      <h2 class="text-xl font-semibold mb-1">Content</h2>
+      <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">4 checks — 35% of your total score</p>
+      <div class="space-y-4">
+
+        <div class="card">
+          <h3 class="font-semibold mb-2">Content Depth</h3>
+          <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
+            <strong>What we check:</strong> Median word count across pages and the ratio of thin pages (under 100 words).
+          </p>
+          <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
+            <strong>Why it matters:</strong> The Princeton/Georgia Tech GEO study (Aggarwal et al., 2023) found that content depth is one of the strongest predictors of citation in AI-generated responses. Thin, shallow pages are unlikely to be cited because they don't provide enough substance for AI systems to extract and reference.
+          </p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            <strong>How we score:</strong> Median word count sets the base: 800+ words = 9, 500+ = 7, 300+ = 5, 100+ = 3, below = 1. Thin page ratio penalises up to 4 points.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3 class="font-semibold mb-2">Heading Quality</h3>
+          <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
+            <strong>What we check:</strong> Whether each page has exactly one H1 and uses a proper heading hierarchy (no skipped levels).
+          </p>
+          <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
+            <strong>Why it matters:</strong> AI systems parse heading structure to understand content hierarchy and extract key topics. The Princeton GEO study identifies heading optimisation as one of nine strategies that improve visibility in generative engines. Skipped heading levels (H1 to H3) confuse both AI parsers and screen readers.
+          </p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            <strong>How we score:</strong> H1 correctness contributes 60% and heading hierarchy contributes 40%. Each is measured as a ratio across all pages.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3 class="font-semibold mb-2">Image Accessibility</h3>
+          <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
+            <strong>What we check:</strong> Alt text coverage and quality across all images on crawled pages.
+          </p>
+          <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
+            <strong>Why it matters:</strong> Images without alt text are invisible to AI systems that process pages as text. WCAG 2.1 requires alt text for accessibility, and the same principle applies to AI indexing — if an image isn't described, its content is lost. Weak alt text (e.g. "image1.jpg") is penalised because it provides no semantic value.
+          </p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            <strong>How we score:</strong> Ratio of images with good alt text, with a 50% penalty applied for weak alt text. 7 if no images exist (not penalised for image-free pages).
+          </p>
+        </div>
+
+        <div class="card">
+          <h3 class="font-semibold mb-2">Answer-First Content</h3>
+          <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
+            <strong>What we check:</strong> Whether content pages (300+ words) lead with substantive answers rather than preamble.
+          </p>
+          <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
+            <strong>Why it matters:</strong> AI search engines extract answers from the beginning of content. Research by Zyppy/Cyrus Shepard on AI citations shows that pages leading with direct answers are significantly more likely to be cited. The Princeton GEO study confirms that content structure — particularly putting key information first — is a major factor in AI visibility.
+          </p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            <strong>How we score:</strong> Ratio of content pages that lead with substantive answers, scaled 0–10. Only pages with 300+ words are evaluated.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Authority category -->
+    <section class="mb-12">
+      <h2 class="text-xl font-semibold mb-1">Authority</h2>
+      <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">3 checks — 30% of your total score</p>
+      <div class="space-y-4">
+
+        <div class="card">
+          <h3 class="font-semibold mb-2">Entity Clarity</h3>
+          <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
+            <strong>What we check:</strong> Whether your site has Organization schema, sameAs links to external profiles, and consistent author information.
+          </p>
+          <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
+            <strong>Why it matters:</strong> AI systems build knowledge graphs to understand who is behind content. Google's Knowledge Graph uses Organization schema and sameAs properties to connect your site to a verified entity. Without these signals, AI systems can't confidently attribute your content or assess its authority.
+          </p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            <strong>How we score:</strong> Organization schema (+3), sameAs links (+1–3 based on count), author info (+2), consistent author across pages (+2). Maximum 10.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3 class="font-semibold mb-2">Agent Discoverability</h3>
+          <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
+            <strong>What we check:</strong> The presence of discovery mechanisms — RSS feeds, sitemaps, OpenAPI specs, and llms.txt.
+          </p>
+          <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
+            <strong>Why it matters:</strong> AI agents need multiple ways to discover and navigate your content. RSS feeds enable real-time content monitoring, sitemaps provide a full page inventory, OpenAPI specs expose programmatic interfaces, and llms.txt provides a curated content guide. Each mechanism serves a different type of AI system.
+          </p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            <strong>How we score:</strong> RSS feed (+3), sitemap (+3), OpenAPI spec (+2), llms.txt (+2). Maximum 10.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3 class="font-semibold mb-2">Trust Signals</h3>
+          <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
+            <strong>What we check:</strong> Consistent author identity, links to known platforms (LinkedIn, GitHub, Twitter/X), and schema type diversity.
+          </p>
+          <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
+            <strong>Why it matters:</strong> Google's E-E-A-T framework (Experience, Expertise, Authoritativeness, Trustworthiness) influences how AI systems weight content. Consistent author identity across pages, verifiable links to established platforms, and diverse schema markup all contribute to a stronger trust profile that AI systems use when deciding what to cite.
+          </p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            <strong>How we score:</strong> Consistent author identity (+1–4), links to known platforms (+1–3), schema type diversity (+1–3). Maximum 10.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sources -->
+    <section class="mb-8">
+      <h2 class="text-xl font-semibold mb-4">Sources & Research</h2>
+      <div class="card">
+        <ul class="space-y-3 text-sm text-gray-600 dark:text-gray-300">
+          <li>
+            <a href="https://arxiv.org/abs/2311.09735" target="_blank" rel="noopener" class="text-brand-600 hover:underline font-medium">GEO: Generative Engine Optimization</a>
+            — Aggarwal et al. (2023), Princeton University & Georgia Tech. The foundational study on optimising content for AI-generated responses.
+          </li>
+          <li>
+            <a href="https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data" target="_blank" rel="noopener" class="text-brand-600 hover:underline font-medium">Google Structured Data Documentation</a>
+            — Guidelines for implementing schema markup that Google (and AI systems) can parse.
+          </li>
+          <li>
+            <a href="https://platform.openai.com/docs/bots" target="_blank" rel="noopener" class="text-brand-600 hover:underline font-medium">OpenAI Crawlers Documentation</a>
+            — How GPTBot and OAI-SearchBot discover and crawl web content, including robots.txt and sitemap compliance.
+          </li>
+          <li>
+            <a href="https://support.anthropic.com/en/articles/8896518-does-anthropic-crawl-data-from-the-web-and-how-can-site-owners-block-the-crawler" target="_blank" rel="noopener" class="text-brand-600 hover:underline font-medium">Anthropic ClaudeBot Documentation</a>
+            — ClaudeBot's crawling behaviour, robots.txt compliance, and how to manage access.
+          </li>
+          <li>
+            <a href="https://llmstxt.org/" target="_blank" rel="noopener" class="text-brand-600 hover:underline font-medium">llmstxt.org Specification</a>
+            — The emerging standard for providing AI-readable site summaries.
+          </li>
+          <li>
+            <a href="https://www.w3.org/TR/WCAG21/" target="_blank" rel="noopener" class="text-brand-600 hover:underline font-medium">W3C WCAG 2.1</a>
+            — Web Content Accessibility Guidelines, including image alt text requirements.
+          </li>
+          <li>
+            <a href="https://ogp.me/" target="_blank" rel="noopener" class="text-brand-600 hover:underline font-medium">Open Graph Protocol</a>
+            — The standard for structured social and sharing metadata.
+          </li>
+          <li>
+            <a href="https://developer.x.com/en/docs/x-for-websites/cards/overview/markup" target="_blank" rel="noopener" class="text-brand-600 hover:underline font-medium">Twitter/X Card Markup</a>
+            — How to implement Twitter Card meta tags for rich previews.
+          </li>
+          <li>
+            <a href="https://zyppy.com/seo/ai-overviews-to-google-ads/" target="_blank" rel="noopener" class="text-brand-600 hover:underline font-medium">Zyppy — How AI Overviews Shift Traffic</a>
+            — Cyrus Shepard's research on how AI overviews impact publisher traffic and citation patterns.
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="text-center pb-4">
+      <a href="/" class="btn-primary">Run a Free Audit</a>
+    </section>
+
+  </div>
+</BaseLayout>
