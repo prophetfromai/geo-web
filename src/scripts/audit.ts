@@ -1,6 +1,6 @@
 const FUNCTIONS_URL = import.meta.env.DEV
-  ? 'http://127.0.0.1:5001/geo-web-audit/europe-west2'
-  : `https://europe-west2-geo-web-audit.cloudfunctions.net`;
+  ? 'http://127.0.0.1:5001/prophetfromai/europe-west2'
+  : `https://europe-west2-prophetfromai.cloudfunctions.net`;
 
 export async function submitAudit(url: string): Promise<{ auditId: string }> {
   const res = await fetch(`${FUNCTIONS_URL}/submitAudit`, {

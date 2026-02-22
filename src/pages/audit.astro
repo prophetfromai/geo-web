@@ -228,6 +228,12 @@ import BaseLayout from "../layouts/BaseLayout.astro";
             <ol class="text-sm space-y-1 list-decimal list-inside">
               ${rec.steps.map((s: string) => `<li>${s}</li>`).join("")}
             </ol>
+            ${rec.snippet ? `
+              <div class="mt-3 relative">
+                <button class="absolute top-2 right-2 text-xs px-2 py-1 rounded bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200 transition-colors" data-copy-snippet>Copy</button>
+                <pre class="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 pr-20 overflow-x-auto text-xs leading-relaxed"><code>${escapeHtml(rec.snippet)}</code></pre>
+              </div>
+            ` : ""}
             ${rec.affectedPages.length > 0 ? `
               <details class="mt-2">
                 <summary class="text-xs text-gray-500 dark:text-gray-400 cursor-pointer">Affected pages (${rec.affectedPages.length})</summary>
@@ -240,6 +246,16 @@ import BaseLayout from "../layouts/BaseLayout.astro";
           const content = el.querySelector("[data-content]") as HTMLElement;
           content.classList.toggle("hidden");
         });
+        const copyBtn = el.querySelector("[data-copy-snippet]") as HTMLButtonElement | null;
+        if (copyBtn && rec.snippet) {
+          copyBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            navigator.clipboard.writeText(rec.snippet).then(() => {
+              copyBtn.textContent = "Copied!";
+              setTimeout(() => { copyBtn.textContent = "Copy"; }, 2000);
+            });
+          });
+        }
         recsList.appendChild(el);
       }
     }
@@ -278,6 +294,9 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         }
         for (let i = 0; i < rec.steps.length; i++) {
           md += `${i + 1}. ${rec.steps[i]}\n`;
+        }
+        if (rec.snippet) {
+          md += `\n\`\`\`\n${rec.snippet}\n\`\`\`\n`;
         }
         if (rec.affectedPages.length > 0) {
           md += `\n**Affected pages:** ${rec.affectedPages.join(", ")}\n`;
@@ -347,5 +366,14 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       case "moderate": return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300";
       default: return "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300";
     }
+  }
+
+  function escapeHtml(str: string): string {
+    return str
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
   }
 </script>

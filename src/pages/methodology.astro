@@ -1,18 +1,52 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://geoaudit.co.uk/" },
+    { "@type": "ListItem", "position": 2, "name": "Methodology" }
+  ]
+};
+
+const articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "GEO Audit Scoring Methodology — 14 AI Visibility Checks",
+  "description": "How GEO Audit scores your site across 14 checks in technical, content, and authority categories. Full methodology with research citations.",
+  "url": "https://geoaudit.co.uk/methodology/",
+  "datePublished": "2025-06-01",
+  "dateModified": "2026-02-22",
+  "author": {
+    "@type": "Person",
+    "name": "Zachary Gander"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "GEO Audit",
+    "url": "https://geoaudit.co.uk"
+  }
+};
 ---
 
 <BaseLayout
-  title="Methodology — GEO Audit"
+  title="GEO Audit Scoring Methodology — 14 AI Visibility Checks"
   description="How GEO Audit scores your site across 14 checks in technical, content, and authority categories. Full methodology with research citations."
 >
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+  <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
+
   <div class="mx-auto max-w-3xl px-4 sm:px-6 py-12">
 
     <!-- Hero -->
     <section class="mb-12">
       <h1 class="text-3xl sm:text-4xl font-bold tracking-tight mb-4">How We Score Your Site</h1>
+      <p class="text-lg text-gray-600 dark:text-gray-300 mb-4">
+        GEO Audit scores your site out of 100 by running <strong>14 checks</strong> across three categories: technical (35%), content (35%), and authority (30%). Each check is scored 0–10 based on how well your site meets the criteria AI search engines use to discover, understand, and cite content. Sites scoring 80+ are rated Excellent; below 40 is Not GEO-ready.
+      </p>
       <p class="text-lg text-gray-600 dark:text-gray-300">
-        GEO Audit runs <strong>14 checks</strong> across three categories — technical, content, and authority — to measure how visible your site is to AI search engines. Every check is grounded in published research and real platform documentation.
+        Every check is grounded in published research — including the Princeton/Georgia Tech GEO study, OpenAI and Anthropic crawler documentation, and Zyppy's AI citation analysis. Below is the full breakdown of what we check, why it matters, and how each score is calculated.
       </p>
     </section>
 

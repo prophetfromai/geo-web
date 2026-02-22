@@ -30,6 +30,45 @@ const {
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
+    <meta property="og:url" content={Astro.url.href} />
+    <meta property="og:site_name" content="GEO Audit" />
+
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "GEO Audit",
+      "url": "https://geoaudit.co.uk",
+      "description": "Free Generative Engine Optimisation audit tool. Check how visible your site is to AI search engines like ChatGPT, Perplexity, and Claude.",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://geoaudit.co.uk/audit?url={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    })} />
+
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "GEO Audit",
+      "url": "https://geoaudit.co.uk",
+      "description": "AI search visibility audits for websites",
+      "sameAs": [
+        "https://github.com/prophetfromai"
+      ]
+    })} />
+
+    <!-- Google Analytics -->
+    <script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-GPCBV63WNR"></script>
+    <script is:inline>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-GPCBV63WNR');
+    </script>
 
     <script is:inline>
       const t = localStorage.getItem("theme") || "light";

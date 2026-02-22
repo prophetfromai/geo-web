@@ -11,29 +11,27 @@ export const AI_CRAWLERS = [
   'cohere-ai',
 ] as const;
 
-/** Scoring weights for Phase 1 (technical only — content & authority added later) */
+/** Scoring weights — total = 1.00 (technical 0.35 + content 0.35 + authority 0.30) */
 export const SCORING_WEIGHTS = {
   technical: {
-    robotsAiRules: 0.08,
-    llmsTxt: 0.08,
-    schemaCoverage: 0.10,
+    robotsAiRules: 0.06,
+    llmsTxt: 0.06,
+    schemaCoverage: 0.08,
     sitemap: 0.04,
-    metaDescriptions: 0.05,
-    httpsAndPerf: 0.05,
+    metaDescriptions: 0.04,
+    httpsAndPerf: 0.03,
+    ogTwitterCompleteness: 0.04,
   },
   content: {
-    depth: 0.08,
-    structure: 0.08,
-    citations: 0.06,
-    statistics: 0.05,
-    eeat: 0.06,
-    freshness: 0.04,
-    internalLinking: 0.03,
+    contentDepth: 0.10,
+    headingQuality: 0.08,
+    imageAccessibility: 0.07,
+    answerFirst: 0.10,
   },
   authority: {
-    contentBreadth: 0.10,
-    directAnswers: 0.05,
-    uniqueValue: 0.05,
+    entityClarity: 0.10,
+    agentDiscoverability: 0.10,
+    trustSignals: 0.10,
   },
 } as const;
 

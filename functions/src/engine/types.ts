@@ -1,3 +1,42 @@
+// ── Page Classification ──
+
+export type PageType =
+  | 'home'
+  | 'landing'
+  | 'article'
+  | 'faq'
+  | 'docs'
+  | 'about'
+  | 'contact'
+  | 'product'
+  | 'unknown';
+
+// ── Image Audit ──
+
+export interface ImageAudit {
+  total: number;
+  withAlt: number;
+  withWeakAlt: number;
+  missingAlt: number;
+}
+
+// ── Identity Signals ──
+
+export interface IdentitySignals {
+  sameAsLinks: string[];
+  hasAuthorInfo: boolean;
+  authorName: string | null;
+}
+
+// ── Discovery ──
+
+export interface DiscoveryResult {
+  rssFound: boolean;
+  rssUrl: string | null;
+  openApiFound: boolean;
+  openApiUrl: string | null;
+}
+
 // ── Page & Crawl ──
 
 export interface PageData {
@@ -60,7 +99,12 @@ export interface MetaResult {
   ogTitle: string | null;
   ogDescription: string | null;
   ogImage: string | null;
+  ogUrl: string | null;
   canonical: string | null;
+  twitterCard: string | null;
+  twitterTitle: string | null;
+  twitterDescription: string | null;
+  twitterImage: string | null;
 }
 
 // ── Page-Level Technical Audit ──
@@ -72,6 +116,11 @@ export interface PageTechnicalAudit {
   headingStructure: { tag: string; text: string }[];
   wordCount: number;
   hasHttps: boolean;
+  pageType: PageType;
+  images: ImageAudit;
+  identity: IdentitySignals;
+  answerFirst: boolean;
+  firstParagraphWords: number;
 }
 
 // ── Site-Level Technical Audit ──
@@ -83,6 +132,7 @@ export interface TechnicalAuditResult {
   sitemapUrls: string[];
   pages: PageTechnicalAudit[];
   httpsEnforced: boolean;
+  discovery: DiscoveryResult;
 }
 
 // ── Scoring ──
@@ -150,6 +200,7 @@ export interface Recommendation {
   affectedPages: string[];
   steps: string[];
   triggeredBy: string;
+  snippet?: string;
 }
 
 export interface RecommendationsResult {

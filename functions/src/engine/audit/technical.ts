@@ -6,10 +6,15 @@ import type {
   RobotsResult,
   TechnicalAuditResult,
 } from '../types.js';
+import { classifyPage } from '../utils/classify.js';
+import { checkDiscovery } from '../utils/discovery.js';
 import { fetchUrl } from '../utils/http.js';
 import {
   countWords,
+  detectAnswerFirst,
   extractHeadings,
+  extractIdentity,
+  extractImages,
   extractMeta,
   extractSchema,
   loadHtml,
@@ -26,9 +31,15 @@ export async function runTechnicalAudit(
 ): Promise<TechnicalAuditResult> {
   const origin = new URL(baseUrl).origin;
 
-  const [robots, llmsTxt] = await Promise.all([
+  // Find homepage HTML for discovery probing
+  const homepage = pages.find((p) => {
+    try { return new URL(p.url).pathname === '/'; } catch { return false; }
+  });
+
+  const [robots, llmsTxt, discovery] = await Promise.all([
     preloadedRobots ?? checkRobotsTxt(origin),
     checkLlmsTxt(origin),
+    checkDiscovery(origin, homepage?.html ?? null),
   ]);
 
   const pageAudits = pages.map((page) => auditPage(page));
@@ -42,6 +53,7 @@ export async function runTechnicalAudit(
     sitemapUrls: robots.sitemapUrls,
     pages: pageAudits,
     httpsEnforced,
+    discovery,
   };
 }
 
@@ -151,13 +163,25 @@ async function checkLlmsTxt(origin: string): Promise<LlmsTxtResult> {
 
 function auditPage(page: PageData): PageTechnicalAudit {
   const $ = loadHtml(page.html);
+  const schema = extractSchema($);
+  const headings = extractHeadings($);
+  const wordCount = countWords($);
+  const images = extractImages($);
+  const identity = extractIdentity(schema.jsonLd);
+  const { answerFirst, firstParagraphWords } = detectAnswerFirst($, headings);
+  const pageType = classifyPage(page.url, schema, wordCount, headings);
 
   return {
     url: page.url,
     meta: extractMeta($),
-    schema: extractSchema($),
-    headingStructure: extractHeadings($),
-    wordCount: countWords($),
+    schema,
+    headingStructure: headings,
+    wordCount,
     hasHttps: page.url.startsWith('https://'),
+    pageType,
+    images,
+    identity,
+    answerFirst,
+    firstParagraphWords,
   };
 }

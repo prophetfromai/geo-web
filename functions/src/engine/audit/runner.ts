@@ -2,7 +2,7 @@ import type { AuditResult, AuditProgress, PageData } from '../types.js';
 import { crawlSite } from '../crawl/crawler.js';
 import { discoverSitemapUrls } from '../crawl/sitemap.js';
 import { checkRobotsTxt, runTechnicalAudit } from './technical.js';
-import { scoreTechnicalAudit } from './scoring.js';
+import { scoreAudit } from './scoring.js';
 
 export interface AuditOptions {
   maxPages?: number;
@@ -39,7 +39,7 @@ export async function runAudit(
   const technical = await runTechnicalAudit(baseUrl, pages, robots);
 
   onProgress?.({ phase: 'Calculating scores' });
-  const score = scoreTechnicalAudit(technical);
+  const score = scoreAudit(technical);
 
   return {
     url: baseUrl,

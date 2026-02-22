@@ -7,6 +7,16 @@ import type {
 } from '../types.js';
 import { AI_CRAWLERS } from '../config.js';
 import { CITATIONS } from './research.js';
+import {
+  generateOrganizationJsonLd,
+  generateWebSiteJsonLd,
+  generateArticleJsonLd,
+  generateFAQPageJsonLd,
+  generateProductJsonLd,
+  generateAboutPageJsonLd,
+  generateLlmsTxt,
+  generateRobotsTxtSuggestion,
+} from './generators.js';
 
 /** Generate actionable recommendations from an audit result */
 export function generateRecommendations(
@@ -18,6 +28,7 @@ export function generateRecommendations(
     ...schemaRules(audit),
     ...metaRules(audit),
     ...contentRules(audit),
+    ...authorityRules(audit),
     ...infrastructureRules(audit),
   ];
 
@@ -67,6 +78,7 @@ function rec(
   affectedPages: string[],
   steps: string[],
   triggeredBy: string,
+  snippet?: string,
 ): Recommendation {
   return {
     id,
@@ -78,6 +90,7 @@ function rec(
     affectedPages,
     steps,
     triggeredBy,
+    ...(snippet ? { snippet } : {}),
   };
 }
 
@@ -103,6 +116,7 @@ function robotsRules(audit: AuditResult): Recommendation[] {
           'Reference your sitemap URL',
         ],
         'No robots.txt detected',
+        generateRobotsTxtSuggestion(audit),
       ),
     );
     return recs;
@@ -126,6 +140,7 @@ function robotsRules(audit: AuditResult): Recommendation[] {
           'Test with a robots.txt validator after changes',
         ],
         `${robots.unmentionedBots.length} AI bots have no rules`,
+        generateRobotsTxtSuggestion(audit),
       ),
     );
   }
@@ -201,6 +216,7 @@ function llmsTxtRules(audit: AuditResult): Recommendation[] {
           'See llmstxt.org for the specification',
         ],
         'llms.txt returned 404',
+        generateLlmsTxt(audit),
       ),
     );
     return recs;
@@ -304,6 +320,7 @@ function schemaRules(audit: AuditResult): Recommendation[] {
           'Validate with Google Rich Results Test',
         ],
         '0 pages have schema',
+        generateOrganizationJsonLd(audit),
       ),
     );
     return recs;
@@ -351,11 +368,38 @@ function schemaRules(audit: AuditResult): Recommendation[] {
           'This is typically added once in the site header/layout',
         ],
         'Organization schema not detected',
+        generateOrganizationJsonLd(audit),
+      ),
+    );
+  }
+
+  if (!allTypes.has('WebSite')) {
+    recs.push(
+      rec(
+        'schema-no-website',
+        'Add WebSite schema with SearchAction',
+        'No WebSite schema found. This helps AI systems understand your site as a whole and enables search functionality in knowledge panels.',
+        'schema',
+        'non-invasive',
+        'medium',
+        CITATIONS.schemaVisibility,
+        [],
+        [
+          'Add WebSite schema to the homepage',
+          'Include a SearchAction if your site has search functionality',
+        ],
+        'WebSite schema not detected',
+        generateWebSiteJsonLd(audit),
       ),
     );
   }
 
   if (!allTypes.has('FAQPage') && pages.length > 5) {
+    // Find a page with question-like headings to generate a snippet for
+    const faqCandidate = pages.find((p) =>
+      p.headingStructure.some((h) => h.text.endsWith('?')),
+    ) ?? pages[0];
+
     recs.push(
       rec(
         'schema-no-faq',
@@ -373,6 +417,7 @@ function schemaRules(audit: AuditResult): Recommendation[] {
           'This is one of the highest-impact schema types for GEO',
         ],
         'No FAQPage schema on site with 5+ pages',
+        generateFAQPageJsonLd(faqCandidate),
       ),
     );
   }
@@ -419,6 +464,31 @@ function schemaRules(audit: AuditResult): Recommendation[] {
           'dateModified is particularly important for AI recency signals',
         ],
         `${contentPagesWithoutArticle.length} content pages missing Article schema`,
+        generateArticleJsonLd(contentPagesWithoutArticle[0]),
+      ),
+    );
+  }
+
+  // Product pages without Product schema
+  const productPages = pages.filter((p) => p.pageType === 'product' && !p.schema.hasProduct);
+  if (productPages.length > 0) {
+    recs.push(
+      rec(
+        'schema-no-product',
+        'Add Product schema to product pages',
+        `${productPages.length} product page(s) lack Product/SoftwareApplication schema.`,
+        'schema',
+        'low',
+        'medium',
+        CITATIONS.schemaVisibility,
+        productPages.map((p) => p.url),
+        [
+          'Add Product or SoftwareApplication schema to product/pricing pages',
+          'Include: name, description, offers with price and currency',
+          'This helps AI systems understand and cite your product details',
+        ],
+        `${productPages.length} product pages missing schema`,
+        generateProductJsonLd(productPages[0]),
       ),
     );
   }
@@ -479,26 +549,51 @@ function metaRules(audit: AuditResult): Recommendation[] {
     );
   }
 
-  const missingOg = pages.filter(
-    (p) => !p.meta.ogTitle && !p.meta.ogDescription,
-  );
-  if (missingOg.length > 0) {
+  // OG tag completeness
+  const incompleteOg = pages.filter((p) => {
+    const m = p.meta;
+    return !(m.ogTitle && m.ogDescription && m.ogImage && m.ogUrl);
+  });
+  if (incompleteOg.length > 0) {
     recs.push(
       rec(
-        'meta-no-og',
-        'Add Open Graph tags',
-        `${missingOg.length} page(s) are missing Open Graph tags.`,
+        'meta-og-incomplete',
+        'Complete Open Graph tags',
+        `${incompleteOg.length} page(s) have incomplete Open Graph metadata (missing og:title, og:description, og:image, or og:url).`,
+        'meta-tags',
+        'non-invasive',
+        'medium',
+        CITATIONS.ogTags,
+        incompleteOg.map((p) => p.url),
+        [
+          'Add og:title, og:description, og:image, and og:url to all pages',
+          'These provide AI systems with consistent metadata for content understanding',
+          'Most CMS platforms have plugins to auto-generate OG tags',
+        ],
+        `${incompleteOg.length} pages with incomplete OG tags`,
+      ),
+    );
+  }
+
+  // Twitter card tags
+  const missingTwitter = pages.filter((p) => !p.meta.twitterCard);
+  if (missingTwitter.length > 0) {
+    recs.push(
+      rec(
+        'meta-no-twitter-card',
+        'Add Twitter/X Card tags',
+        `${missingTwitter.length} page(s) are missing twitter:card metadata. Twitter Cards provide additional signals for AI aggregators and social platforms.`,
         'meta-tags',
         'non-invasive',
         'low',
-        CITATIONS.ogTags,
-        missingOg.map((p) => p.url),
+        CITATIONS.twitterCards,
+        missingTwitter.map((p) => p.url),
         [
-          'Add og:title, og:description, and og:image to all pages',
-          'These help AI systems understand content when shared across platforms',
-          'Most CMS platforms have plugins to auto-generate OG tags',
+          'Add twitter:card (usually "summary_large_image") to all pages',
+          'Add twitter:title, twitter:description, and twitter:image',
+          'These complement OG tags for broader platform coverage',
         ],
-        `${missingOg.length} pages missing OG tags`,
+        `${missingTwitter.length} pages missing Twitter Card tags`,
       ),
     );
   }
@@ -556,6 +651,90 @@ function contentRules(audit: AuditResult): Recommendation[] {
     );
   }
 
+  // Weak alt text on images
+  const pagesWithWeakAlts = pages.filter(
+    (p) => p.images.withWeakAlt > 0 || p.images.missingAlt > 0,
+  );
+  if (pagesWithWeakAlts.length > 0) {
+    const totalWeak = pagesWithWeakAlts.reduce((sum, p) => sum + p.images.withWeakAlt, 0);
+    const totalMissing = pagesWithWeakAlts.reduce((sum, p) => sum + p.images.missingAlt, 0);
+    recs.push(
+      rec(
+        'content-weak-alt-text',
+        'Fix missing or weak image alt text',
+        `${totalMissing} images have no alt text and ${totalWeak} have generic/weak alt text (filenames, single words). AI systems rely on alt text to understand visual content.`,
+        'content-quality',
+        'low',
+        'medium',
+        CITATIONS.imageAlt,
+        pagesWithWeakAlts.map((p) => p.url),
+        [
+          'Add descriptive alt text to all images (describe what the image shows)',
+          'Replace generic alt text (e.g. "image1.jpg", "photo") with meaningful descriptions',
+          'Decorative images should have alt="" (empty string), not missing alt',
+          'Alt text should be concise (125 characters max) but descriptive',
+        ],
+        `${totalMissing + totalWeak} images with missing/weak alt text`,
+      ),
+    );
+  }
+
+  // Answer-first content
+  const contentPages = pages.filter((p) => p.wordCount >= 300);
+  const noAnswerFirst = contentPages.filter((p) => !p.answerFirst);
+  if (noAnswerFirst.length > 0 && contentPages.length > 0) {
+    recs.push(
+      rec(
+        'content-no-answer-first',
+        'Lead with direct answers',
+        `${noAnswerFirst.length}/${contentPages.length} content pages don't lead with substantive answers. AI systems prefer content that answers the topic question in the first paragraph.`,
+        'content-quality',
+        'moderate',
+        'high',
+        CITATIONS.answerFirst,
+        noAnswerFirst.map((p) => p.url),
+        [
+          'Open each content page with a direct answer to the topic question',
+          'Place the most important information in the first 50-100 words',
+          'Avoid lengthy introductions or preambles before the main content',
+          'Use the "inverted pyramid" style — conclusion first, details after',
+        ],
+        `${noAnswerFirst.length} pages don't lead with direct answers`,
+      ),
+    );
+  }
+
+  // Heading hierarchy issues
+  const hierarchyIssues = pages.filter((p) => {
+    const levels = p.headingStructure.map((h) => parseInt(h.tag[1]));
+    for (let i = 1; i < levels.length; i++) {
+      if (levels[i] - levels[i - 1] > 1) return true;
+    }
+    return false;
+  });
+  if (hierarchyIssues.length > 0) {
+    recs.push(
+      rec(
+        'content-heading-hierarchy',
+        'Fix heading hierarchy gaps',
+        `${hierarchyIssues.length} page(s) skip heading levels (e.g. H1 → H3). This confuses AI systems parsing content structure.`,
+        'content-structure',
+        'low',
+        'medium',
+        CITATIONS.headingHierarchy,
+        hierarchyIssues.map((p) => p.url),
+        [
+          'Ensure headings follow a logical sequence: H1 → H2 → H3 (no skipping)',
+          'Each page should have exactly one H1',
+          'Use H2s for main sections, H3s for subsections',
+          'AI systems use heading hierarchy to understand topic relationships',
+        ],
+        `${hierarchyIssues.length} pages with heading hierarchy gaps`,
+      ),
+    );
+  }
+
+  // H1 issues (existing check, kept)
   const headingIssues = pages.filter((p) => {
     const h1s = p.headingStructure.filter((h) => h.tag === 'h1');
     return h1s.length === 0 || h1s.length > 1;
@@ -602,6 +781,118 @@ function contentRules(audit: AuditResult): Recommendation[] {
         'Site not served over HTTPS',
       ),
     );
+  }
+
+  return recs;
+}
+
+function authorityRules(audit: AuditResult): Recommendation[] {
+  const recs: Recommendation[] = [];
+  const pages = audit.technical.pages;
+
+  // No entity signals at all
+  const hasAnyEntity = pages.some((p) =>
+    p.schema.hasOrganization ||
+    p.identity.sameAsLinks.length > 0 ||
+    p.identity.hasAuthorInfo,
+  );
+  if (!hasAnyEntity && pages.length > 0) {
+    recs.push(
+      rec(
+        'authority-no-entity',
+        'Establish entity identity',
+        'No entity identity signals found (no Organization schema, no sameAs links, no author info). AI systems need clear entity information to attribute and cite your content.',
+        'authority',
+        'moderate',
+        'high',
+        CITATIONS.entitySignals,
+        [],
+        [
+          'Add Organization schema with name, url, logo, and description to the homepage',
+          'Include sameAs links to your social profiles (LinkedIn, Twitter/X, GitHub, etc.)',
+          'Add author information to content pages using Article schema',
+          'Ensure author names are consistent across all pages',
+        ],
+        'No entity identity signals detected',
+        generateOrganizationJsonLd(audit),
+      ),
+    );
+  }
+
+  // No RSS feed
+  if (!audit.technical.discovery.rssFound) {
+    recs.push(
+      rec(
+        'authority-no-rss',
+        'Add an RSS feed',
+        'No RSS feed found. RSS provides a machine-readable content index that AI crawlers can monitor for updates and freshness signals.',
+        'authority',
+        'low',
+        'medium',
+        CITATIONS.rssFeed,
+        [],
+        [
+          'Generate an RSS/Atom feed at /feed.xml or /rss.xml',
+          'Include your latest content pages with title, description, and publication date',
+          'Add a <link rel="alternate" type="application/rss+xml"> tag to your HTML <head>',
+          'Most static site generators and CMS platforms can auto-generate RSS feeds',
+        ],
+        'No RSS feed detected',
+      ),
+    );
+  }
+
+  // No author info on any page
+  const hasAuthor = pages.some((p) => p.identity.hasAuthorInfo);
+  if (!hasAuthor && pages.length > 0) {
+    recs.push(
+      rec(
+        'authority-no-author',
+        'Add author information',
+        'No author information found in structured data. Author attribution helps AI systems assess content authority and E-E-A-T signals.',
+        'authority',
+        'low',
+        'medium',
+        CITATIONS.entitySignals,
+        pages.filter((p) => p.wordCount >= 300).map((p) => p.url),
+        [
+          'Add author information to Article/BlogPosting schema on content pages',
+          'Include author name and optionally url, image, and sameAs links',
+          'Use consistent author names across all pages',
+          'Consider adding an about page with detailed author/team bios',
+        ],
+        'No author info in structured data',
+      ),
+    );
+  }
+
+  // About page suggestions
+  const aboutPages = pages.filter((p) => p.pageType === 'about');
+  if (aboutPages.length > 0) {
+    const withoutAboutSchema = aboutPages.filter(
+      (p) => !p.schema.types.some((t) => t === 'AboutPage' || t === 'Organization'),
+    );
+    if (withoutAboutSchema.length > 0) {
+      recs.push(
+        rec(
+          'authority-about-no-schema',
+          'Add schema to about page',
+          'Your about page lacks AboutPage or Organization schema. This is a key page for establishing entity identity with AI systems.',
+          'authority',
+          'non-invasive',
+          'medium',
+          CITATIONS.entitySignals,
+          withoutAboutSchema.map((p) => p.url),
+          [
+            'Add AboutPage schema to your about page',
+            'Include Organization as the mainEntity',
+            'Add team member information as Person schema if applicable',
+          ],
+          'About page missing schema',
+          generateAboutPageJsonLd(withoutAboutSchema[0], audit),
+        ),
+      );
+    }
   }
 
   return recs;
