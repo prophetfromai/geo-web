@@ -12,4 +12,4 @@ Compacted from older log entries. Persistent signals and recurring interests.
 
 Max ~20 entries. When full, compact the oldest entries into Themes above, then remove them.
 
-- [2026-02-22] Dan: Initial build — anonymous MVP with GEO engine ported from CLI, Astro + Firebase + Tailwind
+- [2026-02-22] Zac: Initial build — anonymous MVP with GEO engine ported from CLI, Astro + Firebase + Tailwind
