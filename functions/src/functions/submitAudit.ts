@@ -26,7 +26,7 @@ export const submitAudit = onRequest(
     try {
       const normalized = url.startsWith('http') ? url : `https://${url}`;
       parsedUrl = new URL(normalized);
-      if (!parsedUrl.hostname.includes('.')) {
+      if (!parsedUrl.hostname.includes('.') && parsedUrl.hostname !== 'localhost') {
         throw new Error('Invalid hostname');
       }
     } catch {
