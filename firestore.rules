@@ -1,0 +1,16 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Audits: anyone can read by ID (the ID is the capability token), all writes server-only
+    match /audits/{auditId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Rate limits: server-only
+    match /rateLimits/{limitId} {
+      allow read, write: if false;
+    }
+  }
+}
