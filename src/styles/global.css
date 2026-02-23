@@ -17,6 +17,10 @@
     --color-border: 51 65 85;
   }
 
+  html {
+    overscroll-behavior-x: none;
+  }
+
   body {
     @apply bg-[rgb(var(--color-bg))] text-[rgb(var(--color-text))] antialiased;
   }
