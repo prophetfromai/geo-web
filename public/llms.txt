@@ -84,8 +84,21 @@ If the user requests a new scan of a previously audited domain:
 GET https://geoaudit.co.uk/report?url=example.com&fresh=true
 ```
 
+## Claude Code Skill
+
+Developers using Claude Code can install a skill to run GEO audits directly from their editor:
+
+```
+/geo-audit example.com
+```
+
+Setup instructions and the full SKILL.md file: https://geoaudit.co.uk/integrate
+
+The skill handles URL detection, API polling, result presentation, and offers to implement recommendations when working on the audited site's codebase.
+
 ## Links
 
 - [Run a free audit](https://geoaudit.co.uk): Paste any URL and get an instant GEO score
 - [Full methodology](https://geoaudit.co.uk/methodology): Detailed scoring breakdown with research citations
 - [Agent API](https://geoaudit.co.uk/report?url=example.com): Direct API endpoint for AI agents
+- [Integrate](https://geoaudit.co.uk/integrate): Claude Code skill, curl, and CI/CD usage

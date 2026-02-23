@@ -1,0 +1,239 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://geoaudit.co.uk/" },
+    { "@type": "ListItem", "position": 2, "name": "Integrate" }
+  ]
+};
+
+const articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Integrate GEO Audit — Claude Code Skill, curl & CI/CD",
+  "description": "Add GEO audits to your workflow. Install the Claude Code skill to run /geo-audit from your editor, or use curl and CI/CD pipelines.",
+  "url": "https://geoaudit.co.uk/integrate/",
+  "datePublished": "2026-02-23",
+  "dateModified": "2026-02-23",
+  "author": {
+    "@type": "Person",
+    "name": "Zachary Gander"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "GEO Audit",
+    "url": "https://geoaudit.co.uk"
+  }
+};
+
+const pollScript = `#!/bin/bash
+URL="\${1:?Usage: geo-audit.sh example.com}"
+ENDPOINT="https://geoaudit.co.uk/report?url=$URL"
+
+while true; do
+  HTTP_CODE=$(curl -s -o /tmp/geo-report.md -w "%{http_code}" "$ENDPOINT")
+  if [ "$HTTP_CODE" = "200" ]; then
+    cat /tmp/geo-report.md
+    exit 0
+  elif [ "$HTTP_CODE" = "202" ]; then
+    echo "Audit in progress, retrying..." >&2
+    sleep 15
+  else
+    echo "Error: HTTP $HTTP_CODE" >&2
+    exit 1
+  fi
+done`;
+
+const skillContent = `---
+name: geo-audit
+description: Run a GEO audit on a URL to check AI search visibility
+user-invocable: true
+allowed-tools: Bash
+---
+
+Run a GEO (Generative Engine Optimisation) audit using the GEO Audit API at geoaudit.co.uk.
+
+## Accepting a URL
+
+If the user provides a URL or domain as an argument (e.g. \`/geo-audit example.com\`), use that.
+
+If no argument is given, try to detect the project's domain by checking (in order):
+1. \`package.json\` → \`homepage\` field
+2. \`CNAME\` file in the repo root
+3. Common config files (\`astro.config.*\`, \`next.config.*\`, \`netlify.toml\`, \`vercel.json\`) for site URL
+4. Ask the user
+
+## Running the audit
+
+Use curl to call the GEO Audit API with a polling loop:
+
+\`\`\`bash
+URL="<the domain>"
+ENDPOINT="https://geoaudit.co.uk/report?url=$URL"
+
+RESPONSE=$(curl -s -w "\\n%{http_code}" "$ENDPOINT")
+HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+BODY=$(echo "$RESPONSE" | sed '$d')
+
+while [ "$HTTP_CODE" = "202" ]; do
+  RETRY=$(echo "$RESPONSE" | grep -i "retry-after" | head -1 | tr -d '\\r' | awk '{print $2}')
+  RETRY=\${RETRY:-15}
+  sleep "$RETRY"
+  RESPONSE=$(curl -s -w "\\n%{http_code}" "$ENDPOINT")
+  HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+  BODY=$(echo "$RESPONSE" | sed '$d')
+done
+\`\`\`
+
+## Presenting results
+
+From the Markdown report, extract and present:
+- **Score** and **grade** (e.g. "72/100 — Good")
+- **Category breakdown** — Technical, Content, Authority scores
+- **Top priorities** — the highest-impact recommendations
+
+## Offering to help
+
+If you are currently working on the audited site's codebase, offer to implement the top recommendations. For example:
+- Adding missing structured data
+- Creating an llms.txt file
+- Fixing robots.txt AI crawler rules
+- Improving heading hierarchy or meta descriptions`;
+---
+
+<BaseLayout
+  title="Integrate GEO Audit — Claude Code Skill, curl & CI/CD"
+  description="Add GEO audits to your workflow. Install the Claude Code skill to run /geo-audit from your editor, or use curl and CI/CD pipelines."
+>
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+  <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
+
+  <div class="mx-auto max-w-3xl px-4 sm:px-6 py-12">
+
+    <!-- Hero -->
+    <section class="mb-12">
+      <h1 class="text-3xl sm:text-4xl font-bold tracking-tight mb-4">Integrate GEO Audit</h1>
+      <p class="text-lg text-gray-600 dark:text-gray-300">
+        Add AI search visibility audits to your development workflow.
+        Install the Claude Code skill, use curl, or plug into your CI/CD pipeline.
+      </p>
+    </section>
+
+    <!-- Claude Code Skill -->
+    <section class="mb-12">
+      <h2 class="text-xl font-semibold mb-4">Claude Code Skill</h2>
+      <p class="text-gray-600 dark:text-gray-300 mb-6">
+        Run <code class="text-sm bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">/geo-audit example.com</code> from any project in Claude Code. Three steps:
+      </p>
+
+      <div class="space-y-4">
+        <div class="card">
+          <h3 class="font-semibold mb-2">Step 1 — Create the skill directory</h3>
+          <div class="relative">
+            <pre class="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 text-sm overflow-x-auto"><code>mkdir -p .claude/skills/geo-audit</code></pre>
+            <button class="copy-btn absolute top-2 right-2 p-1.5 rounded-md bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition text-xs" data-target="step1">Copy</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="font-semibold mb-2">Step 2 — Save the skill file</h3>
+          <p class="text-sm text-gray-600 dark:text-gray-300 mb-3">
+            Copy this into <code class="text-sm bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">.claude/skills/geo-audit/SKILL.md</code>:
+          </p>
+          <div class="relative">
+            <pre id="skill-content" class="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 text-sm overflow-x-auto max-h-96 overflow-y-auto"><code set:text={skillContent} /></pre>
+            <button class="copy-btn absolute top-2 right-2 p-1.5 rounded-md bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition text-xs" data-target="skill-content">Copy</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="font-semibold mb-2">Step 3 — Use it</h3>
+          <div class="relative">
+            <pre class="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 text-sm overflow-x-auto"><code>/geo-audit example.com</code></pre>
+          </div>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-3">
+            Claude will call the GEO Audit API, poll for results, and present your score, category breakdown, and top priorities.
+            If you're working on the audited site, it'll offer to implement the recommendations.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- curl / CI/CD -->
+    <section class="mb-12">
+      <h2 class="text-xl font-semibold mb-4">curl / CI/CD</h2>
+
+      <div class="card mb-4">
+        <h3 class="font-semibold mb-2">Quick one-liner</h3>
+        <div class="relative">
+          <pre id="curl-oneliner" class="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 text-sm overflow-x-auto"><code>curl -s "https://geoaudit.co.uk/report?url=example.com"</code></pre>
+          <button class="copy-btn absolute top-2 right-2 p-1.5 rounded-md bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition text-xs" data-target="curl-oneliner">Copy</button>
+        </div>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
+          Returns the full Markdown report. If the audit isn't ready yet, you'll get a 202 — retry after the <code class="text-sm bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">Retry-After</code> header.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3 class="font-semibold mb-2">Polling script for pipelines</h3>
+        <div class="relative">
+          <pre id="poll-script" class="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 text-sm overflow-x-auto"><code set:text={pollScript} /></pre>
+          <button class="copy-btn absolute top-2 right-2 p-1.5 rounded-md bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition text-xs" data-target="poll-script">Copy</button>
+        </div>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
+          Polls until the audit completes. Use in GitHub Actions, GitLab CI, or any pipeline.
+        </p>
+      </div>
+    </section>
+
+    <!-- How it works -->
+    <section class="mb-12">
+      <h2 class="text-xl font-semibold mb-4">How it works</h2>
+      <div class="card">
+        <p class="text-gray-600 dark:text-gray-300 mb-3">
+          The <code class="text-sm bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">/report?url=</code> endpoint accepts any domain or URL and returns a full GEO audit as Markdown.
+        </p>
+        <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+          <li><strong>202</strong> — Audit started or in progress. Check <code class="text-sm bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">Retry-After</code> header (20s for new, 10s for in-progress).</li>
+          <li><strong>200</strong> — Audit complete. Response body is the full Markdown report.</li>
+          <li><strong>fresh=true</strong> — Force a new scan even if a recent result exists.</li>
+        </ul>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-4">
+          Send <code class="text-sm bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">Accept: application/json</code> for JSON output.
+          Full API documentation: <a href="/llms.txt" class="text-brand-600 hover:underline">/llms.txt</a>
+        </p>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="text-center pb-4">
+      <a href="/" class="btn-primary">Run a Free Audit</a>
+    </section>
+
+  </div>
+</BaseLayout>
+
+<script>
+  document.querySelectorAll('.copy-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.getAttribute('data-target');
+      let text: string;
+
+      if (targetId === 'step1') {
+        text = 'mkdir -p .claude/skills/geo-audit';
+      } else {
+        const el = document.getElementById(targetId!);
+        text = el?.textContent || '';
+      }
+
+      navigator.clipboard.writeText(text).then(() => {
+        const original = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = original; }, 2000);
+      });
+    });
+  });
+</script>

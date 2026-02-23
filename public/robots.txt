@@ -39,3 +39,4 @@ RSS: https://geoaudit.co.uk/rss.xml
 # AI Agent API — run a GEO audit via plain HTTP GET
 # Usage: GET https://geoaudit.co.uk/report?url=example.com
 # Docs: https://geoaudit.co.uk/llms.txt
+# Integrate: https://geoaudit.co.uk/integrate (Claude Code skill, curl, CI/CD)
