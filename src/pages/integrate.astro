@@ -68,24 +68,11 @@ If no argument is given, try to detect the project's domain by checking (in orde
 
 ## Running the audit
 
-Use curl to call the GEO Audit API with a polling loop:
+Use curl to call the GEO Audit API with \`wait=true\` (holds the connection until the audit completes — no polling needed):
 
 \`\`\`bash
 URL="<the domain>"
-ENDPOINT="https://geoaudit.co.uk/report?url=$URL"
-
-RESPONSE=$(curl -s -w "\\n%{http_code}" "$ENDPOINT")
-HTTP_CODE=$(echo "$RESPONSE" | tail -1)
-BODY=$(echo "$RESPONSE" | sed '$d')
-
-while [ "$HTTP_CODE" = "202" ]; do
-  RETRY=$(echo "$RESPONSE" | grep -i "retry-after" | head -1 | tr -d '\\r' | awk '{print $2}')
-  RETRY=\${RETRY:-15}
-  sleep "$RETRY"
-  RESPONSE=$(curl -s -w "\\n%{http_code}" "$ENDPOINT")
-  HTTP_CODE=$(echo "$RESPONSE" | tail -1)
-  BODY=$(echo "$RESPONSE" | sed '$d')
-done
+curl -s "https://geoaudit.co.uk/report?url=$URL&wait=true"
 \`\`\`
 
 ## Presenting results
@@ -197,7 +184,8 @@ If you are currently working on the audited site's codebase, offer to implement 
           The <code class="text-sm bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">/report?url=</code> endpoint accepts any domain or URL and returns a full GEO audit as Markdown.
         </p>
         <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-300">
-          <li><strong>202</strong> — Audit started or in progress. Check <code class="text-sm bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">Retry-After</code> header (20s for new, 10s for in-progress).</li>
+          <li><strong>wait=true</strong> — Hold the connection open until the audit completes (up to ~280s). No polling needed — ideal for AI agents and single-request tools.</li>
+          <li><strong>202</strong> — Audit started or in progress (without <code class="text-sm bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">wait=true</code>). Check <code class="text-sm bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">Retry-After</code> header (20s for new, 10s for in-progress).</li>
           <li><strong>200</strong> — Audit complete. Response body is the full Markdown report.</li>
           <li><strong>fresh=true</strong> — Force a new scan even if a recent result exists.</li>
         </ul>

@@ -59,6 +59,7 @@ GET https://geoaudit.co.uk/report?url=example.com
 **Parameters:**
 - `url` (required) — domain or full URL to audit (e.g. `example.com` or `https://example.com/page`)
 - `fresh=true` (optional) — force a new scan even if a recent result exists
+- `wait=true` (optional) — hold the connection open until the audit completes (up to ~280s). No polling needed — ideal for single-fetch AI agents like ChatGPT
 
 **Response format:**
 - Default: plain text (`text/plain`) containing Markdown-formatted content — readable by any browser or AI agent
@@ -69,7 +70,15 @@ GET https://geoaudit.co.uk/report?url=example.com
 - `202` — audit in progress or just started. Check the `Retry-After` header (10s for in-progress, 20s for just started) and retry the same URL
 - `400` — missing or invalid `url` parameter
 
-### Example workflow for an AI agent
+### Recommended: single-request mode (for AI agents)
+
+```
+GET https://geoaudit.co.uk/report?url=example.com&wait=true
+```
+
+The server holds the connection open and returns the full report when ready. If the audit takes longer than ~280 seconds, returns a timeout message with a link to check back.
+
+### Alternative: polling workflow
 
 1. `GET /report?url=example.com` → receive `202` with `Retry-After: 20`
 2. Wait 20 seconds

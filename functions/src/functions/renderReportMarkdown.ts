@@ -55,6 +55,10 @@ export function renderReportMarkdown(data: AuditData): string {
     return renderCompleted(data);
   }
 
+  if (data.status === 'timeout') {
+    return renderTimeout(data);
+  }
+
   if (data.status === 'failed') {
     return renderFailed(data);
   }
@@ -159,6 +163,14 @@ function renderFailed(data: AuditData): string {
     md += `**Error:** ${data.error}\n\n`;
   }
   md += `To try again, visit: https://geoaudit.co.uk/report?url=${data.domain}&fresh=true\n`;
+  return md;
+}
+
+function renderTimeout(data: AuditData): string {
+  let md = `# GEO Audit — ${data.domain}\n\n`;
+  md += `**Status:** Still running\n\n`;
+  md += `The audit for ${data.domain} is still in progress after waiting.\n\n`;
+  md += `Check back at: https://geoaudit.co.uk/report?url=${data.domain}\n`;
   return md;
 }
 

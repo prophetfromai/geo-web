@@ -1,12 +1,39 @@
 import { onRequest } from 'firebase-functions/v2/https';
 import { Timestamp } from 'firebase-admin/firestore';
-import { db, FUNCTIONS_REGION, ANON_MAX_PAGES, ANON_EXPIRY_MS } from '../config.js';
+import type { Response } from 'express';
+import { db, FUNCTIONS_REGION, MAX_INSTANCES, ANON_MAX_PAGES, ANON_EXPIRY_MS } from '../config.js';
 import { renderReportMarkdown } from './renderReportMarkdown.js';
+
+const WAIT_TIMEOUT_MS = 280_000;
+
+function waitForAuditCompletion(
+  docRef: FirebaseFirestore.DocumentReference,
+  timeoutMs: number = WAIT_TIMEOUT_MS,
+): Promise<FirebaseFirestore.DocumentData | null> {
+  return new Promise((resolve) => {
+    const timer = setTimeout(() => {
+      unsubscribe();
+      resolve(null);
+    }, timeoutMs);
+
+    const unsubscribe = docRef.onSnapshot((snap) => {
+      const data = snap.data();
+      if (!data) return;
+      if (data.status === 'completed' || data.status === 'failed') {
+        clearTimeout(timer);
+        unsubscribe();
+        resolve(data);
+      }
+    });
+  });
+}
 
 export const auditByUrl = onRequest(
   {
     region: FUNCTIONS_REGION,
     cors: true,
+    timeoutSeconds: 300,
+    maxInstances: MAX_INSTANCES,
   },
   async (req, res) => {
     if (req.method !== 'GET') {
@@ -22,9 +49,11 @@ export const auditByUrl = onRequest(
         '**Usage:** `GET /report?url=example.com`\n\n' +
         '**Parameters:**\n' +
         '- `url` (required) — domain or URL to audit\n' +
-        '- `fresh=true` — force a new scan even if a recent one exists\n\n' +
+        '- `fresh=true` — force a new scan even if a recent one exists\n' +
+        '- `wait=true` — hold connection open until audit completes (up to ~280s)\n\n' +
         '**Response:** Markdown report (or JSON with `Accept: application/json`)\n\n' +
-        'Completed audits return `200`. In-progress audits return `202` with `Retry-After` header.\n';
+        'Completed audits return `200`. In-progress audits return `202` with `Retry-After` header.\n' +
+        'With `wait=true`, the response blocks until the audit finishes — no polling needed.\n';
 
       const wantsJson = (req.headers.accept || '').includes('application/json');
       if (wantsJson) {
@@ -34,6 +63,7 @@ export const auditByUrl = onRequest(
           parameters: {
             url: 'domain or URL to audit (required)',
             fresh: 'set to true to force a new scan',
+            wait: 'set to true to hold connection until audit completes',
           },
         });
       } else {
@@ -62,6 +92,7 @@ export const auditByUrl = onRequest(
 
     const hostname = parsedUrl.hostname;
     const fresh = req.query.fresh === 'true';
+    const waitForResult = req.query.wait === 'true';
     const wantsJson = (req.headers.accept || '').includes('application/json');
     const now = Timestamp.now();
 
@@ -146,6 +177,13 @@ export const auditByUrl = onRequest(
       }
 
       // Queued or running
+      if (waitForResult) {
+        const docRef = db.collection('audits').doc(existingDoc.id);
+        const completed = await waitForAuditCompletion(docRef);
+        sendWaitResponse(res, wantsJson, existingDoc.id, hostname, data.url, completed);
+        return;
+      }
+
       const reportData = {
         auditId: existingDoc.id,
         domain: hostname,
@@ -189,6 +227,12 @@ export const auditByUrl = onRequest(
       expiresAt,
     });
 
+    if (waitForResult) {
+      const completed = await waitForAuditCompletion(auditRef);
+      sendWaitResponse(res, wantsJson, auditRef.id, hostname, parsedUrl.href, completed);
+      return;
+    }
+
     const reportData = {
       auditId: auditRef.id,
       domain: hostname,
@@ -215,3 +259,82 @@ export const auditByUrl = onRequest(
     }
   },
 );
+
+function sendWaitResponse(
+  res: Response,
+  wantsJson: boolean,
+  auditId: string,
+  domain: string,
+  url: string,
+  data: FirebaseFirestore.DocumentData | null,
+): void {
+  if (!data) {
+    // Timeout — audit still running
+    if (wantsJson) {
+      res.status(200).json({
+        auditId,
+        url,
+        domain,
+        status: 'timeout',
+        message: 'Audit is still running after waiting. Check back later.',
+      });
+    } else {
+      res
+        .status(200)
+        .type('text/plain; charset=utf-8')
+        .send(renderReportMarkdown({ auditId, domain, status: 'timeout' }));
+    }
+    return;
+  }
+
+  if (data.status === 'completed') {
+    const reportData = {
+      auditId,
+      domain,
+      status: 'completed' as const,
+      result: data.result,
+      recommendations: data.recommendations,
+    };
+
+    if (wantsJson) {
+      res.status(200).json({
+        auditId,
+        url,
+        domain,
+        status: 'completed',
+        result: data.result,
+        recommendations: data.recommendations,
+      });
+    } else {
+      res
+        .status(200)
+        .type('text/plain; charset=utf-8')
+        .send(renderReportMarkdown(reportData));
+    }
+    return;
+  }
+
+  // Failed
+  const reportData = {
+    auditId,
+    domain,
+    status: 'failed',
+    error: data.error || 'Unknown error',
+  };
+
+  if (wantsJson) {
+    res.status(200).json({
+      auditId,
+      url,
+      domain,
+      status: 'failed',
+      error: data.error || 'Unknown error',
+      message: 'Audit failed. Use ?fresh=true to retry.',
+    });
+  } else {
+    res
+      .status(200)
+      .type('text/plain; charset=utf-8')
+      .send(renderReportMarkdown(reportData));
+  }
+}
