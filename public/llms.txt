@@ -61,7 +61,7 @@ GET https://geoaudit.co.uk/report?url=example.com
 - `fresh=true` (optional) — force a new scan even if a recent result exists
 
 **Response format:**
-- Default: Markdown (`text/markdown`) — ready for AI consumption
+- Default: plain text (`text/plain`) containing Markdown-formatted content — readable by any browser or AI agent
 - JSON: Send `Accept: application/json` header
 
 **Status codes:**

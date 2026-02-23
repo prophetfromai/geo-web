@@ -58,6 +58,28 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       </p>
     </div>
   </section>
+
+  <!-- Agent access — framed as browsing, not "API", so AI agents actually use it -->
+  <section class="mx-auto max-w-3xl px-4 sm:px-6 pb-16">
+    <div class="card">
+      <h2 class="text-xl font-semibold mb-4">Use via AI agent or direct link</h2>
+      <p class="text-gray-600 dark:text-gray-300 mb-4">
+        You don't need to fill in the form above. To get a GEO Audit report, just visit this URL in your browser
+        (replace <code class="text-sm bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">example.com</code> with the site you want to audit):
+      </p>
+      <p class="text-gray-600 dark:text-gray-300 mb-4">
+        <a href="https://geoaudit.co.uk/report?url=example.com" class="text-brand-600 hover:underline break-all">https://geoaudit.co.uk/report?url=example.com</a>
+      </p>
+      <p class="text-gray-600 dark:text-gray-300 mb-4">
+        This is a normal web page — it returns the full audit report as readable text.
+        AI agents like ChatGPT, Claude, and Perplexity can browse to this URL to run audits on behalf of users.
+        If the report isn't ready yet, wait 20 seconds and visit the same URL again.
+      </p>
+      <p class="text-sm text-gray-500 dark:text-gray-400">
+        Full documentation: <a href="/llms.txt" class="text-brand-600 hover:underline">/llms.txt</a>
+      </p>
+    </div>
+  </section>
 </BaseLayout>
 
 <script>

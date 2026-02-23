@@ -37,7 +37,7 @@ export const auditByUrl = onRequest(
           },
         });
       } else {
-        res.status(400).type('text/markdown; charset=utf-8').send(usage);
+        res.status(400).type('text/plain; charset=utf-8').send(usage);
       }
       return;
     }
@@ -55,7 +55,7 @@ export const auditByUrl = onRequest(
       if (wantsJson) {
         res.status(400).json({ error: 'Invalid URL' });
       } else {
-        res.status(400).type('text/markdown; charset=utf-8').send('# Error\n\nInvalid URL. Provide a valid domain, e.g. `?url=example.com`\n');
+        res.status(400).type('text/plain; charset=utf-8').send('# Error\n\nInvalid URL. Provide a valid domain, e.g. `?url=example.com`\n');
       }
       return;
     }
@@ -83,7 +83,7 @@ export const auditByUrl = onRequest(
         // Skip expired audits
         if (data.expiresAt && data.expiresAt.toMillis() < now.toMillis()) {
           existingDoc = null;
-        } else if (data.status !== 'failed') {
+        } else {
           existingDoc = doc;
         }
       }
@@ -91,6 +91,32 @@ export const auditByUrl = onRequest(
 
     if (existingDoc) {
       const data = existingDoc.data();
+
+      if (data.status === 'failed') {
+        const reportData = {
+          auditId: existingDoc.id,
+          domain: hostname,
+          status: 'failed',
+          error: data.error || 'Unknown error',
+        };
+
+        if (wantsJson) {
+          res.status(200).json({
+            auditId: existingDoc.id,
+            url: data.url,
+            domain: hostname,
+            status: 'failed',
+            error: data.error || 'Unknown error',
+            message: 'Audit failed. Use ?fresh=true to retry.',
+          });
+        } else {
+          res
+            .status(200)
+            .type('text/plain; charset=utf-8')
+            .send(renderReportMarkdown(reportData));
+        }
+        return;
+      }
 
       if (data.status === 'completed') {
         const reportData = {
@@ -113,7 +139,7 @@ export const auditByUrl = onRequest(
         } else {
           res
             .status(200)
-            .type('text/markdown; charset=utf-8')
+            .type('text/plain; charset=utf-8')
             .send(renderReportMarkdown(reportData));
         }
         return;
@@ -143,7 +169,7 @@ export const auditByUrl = onRequest(
         res
           .status(202)
           .set('Retry-After', '10')
-          .type('text/markdown; charset=utf-8')
+          .type('text/plain; charset=utf-8')
           .send(renderReportMarkdown(reportData));
       }
       return;
@@ -184,7 +210,7 @@ export const auditByUrl = onRequest(
       res
         .status(202)
         .set('Retry-After', '20')
-        .type('text/markdown; charset=utf-8')
+        .type('text/plain; charset=utf-8')
         .send(renderReportMarkdown(reportData));
     }
   },

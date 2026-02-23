@@ -47,11 +47,16 @@ interface AuditData {
   result?: AuditResult;
   recommendations?: { recommendations: Recommendation[] };
   progress?: { phase?: string; pagesCrawled?: number; maxPages?: number };
+  error?: string;
 }
 
 export function renderReportMarkdown(data: AuditData): string {
   if (data.status === 'completed' && data.result) {
     return renderCompleted(data);
+  }
+
+  if (data.status === 'failed') {
+    return renderFailed(data);
   }
 
   if (data.status === 'running' || data.status === 'queued') {
@@ -143,6 +148,17 @@ function renderInProgress(data: AuditData): string {
   }
 
   md += `\nThe audit is in progress. Retry this request in 10 seconds.\n`;
+  return md;
+}
+
+function renderFailed(data: AuditData): string {
+  let md = `# GEO Audit — ${data.domain}\n\n`;
+  md += `**Status:** Failed\n\n`;
+  md += `The audit for ${data.domain} could not be completed.\n\n`;
+  if (data.error) {
+    md += `**Error:** ${data.error}\n\n`;
+  }
+  md += `To try again, visit: https://geoaudit.co.uk/report?url=${data.domain}&fresh=true\n`;
   return md;
 }
 
