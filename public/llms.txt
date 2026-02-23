@@ -46,7 +46,46 @@ Grades: Excellent (80+), Good (60–79), Needs Work (40–59), Not GEO-ready (<4
 - [Twitter/X Card Markup](https://developer.x.com/en/docs/x-for-websites/cards/overview/markup)
 - [Zyppy — How AI Overviews Shift Traffic](https://zyppy.com/seo/ai-overviews-to-google-ads/) — Cyrus Shepard's research on AI citation patterns
 
+## API for AI Agents
+
+GEO Audit has an API endpoint designed for AI agents and automated tools. No authentication required.
+
+### Run an audit
+
+```
+GET https://geoaudit.co.uk/report?url=example.com
+```
+
+**Parameters:**
+- `url` (required) — domain or full URL to audit (e.g. `example.com` or `https://example.com/page`)
+- `fresh=true` (optional) — force a new scan even if a recent result exists
+
+**Response format:**
+- Default: Markdown (`text/markdown`) — ready for AI consumption
+- JSON: Send `Accept: application/json` header
+
+**Status codes:**
+- `200` — audit complete, response contains full Markdown report with scores, breakdown, and recommendations
+- `202` — audit in progress or just started. Check the `Retry-After` header (10s for in-progress, 20s for just started) and retry the same URL
+- `400` — missing or invalid `url` parameter
+
+### Example workflow for an AI agent
+
+1. `GET /report?url=example.com` → receive `202` with `Retry-After: 20`
+2. Wait 20 seconds
+3. `GET /report?url=example.com` → receive `202` with `Retry-After: 10` (still processing)
+4. Wait 10 seconds
+5. `GET /report?url=example.com` → receive `200` with full Markdown report
+
+### Force a fresh scan
+
+If the user requests a new scan of a previously audited domain:
+```
+GET https://geoaudit.co.uk/report?url=example.com&fresh=true
+```
+
 ## Links
 
 - [Run a free audit](https://geoaudit.co.uk): Paste any URL and get an instant GEO score
 - [Full methodology](https://geoaudit.co.uk/methodology): Detailed scoring breakdown with research citations
+- [Agent API](https://geoaudit.co.uk/report?url=example.com): Direct API endpoint for AI agents
