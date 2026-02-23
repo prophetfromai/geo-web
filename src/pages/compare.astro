@@ -2,12 +2,29 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 ---
 
-<BaseLayout title="Compare Audits — GEO Audit" noindex={true}>
+<BaseLayout
+  title="Compare GEO Audit Reports Side by Side — GEO Audit"
+  description="Compare two GEO audit reports to see how sites stack up on AI search visibility. Upload downloaded reports and get a check-by-check breakdown."
+>
   <div class="mx-auto max-w-5xl px-4 sm:px-6 py-8">
+
+    <!-- Intro content -->
+    <div class="max-w-2xl mx-auto text-center mb-10">
+      <h1 class="text-2xl font-bold mb-3">Compare Two GEO Audit Reports</h1>
+      <p class="text-sm text-gray-600 dark:text-gray-300 mb-3">
+        See how two sites stack up on AI search visibility. Upload the Markdown reports you downloaded from your audits, and this tool will break down the differences — overall score, category scores, individual checks, and recommendations.
+      </p>
+      <p class="text-sm text-gray-600 dark:text-gray-300 mb-3">
+        Use this to benchmark your site against a competitor, track your own progress after making changes, or compare two different domains to understand where each one's GEO strengths and gaps lie.
+      </p>
+      <p class="text-sm text-gray-500 dark:text-gray-400">
+        Everything runs locally in your browser — your report files are never uploaded to a server.
+      </p>
+    </div>
 
     <!-- Input form — two drop zones -->
     <div id="form-state">
-      <h1 class="text-2xl font-bold mb-2 text-center">Compare Two Audits</h1>
+      <h2 class="text-lg font-semibold mb-2 text-center">Upload Reports</h2>
       <p class="text-sm text-gray-500 dark:text-gray-400 text-center mb-6">Drop your downloaded audit report files to compare them side by side.</p>
       <div class="grid sm:grid-cols-2 gap-4 mb-4">
         <div>
